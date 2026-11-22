@@ -137,9 +137,9 @@ def create_order(buyer_id, product_id, quantity, payment_method, delivery_addres
         promotion = None
         if coupon_code:
             promotion = connection.execute("""SELECT * FROM promotion_codes
-                WHERE code=? COLLATE NOCASE AND active=1
-                AND (starts_at IS NULL OR starts_at='' OR starts_at<=CURRENT_TIMESTAMP)
-                AND (ends_at IS NULL OR ends_at='' OR ends_at>=CURRENT_TIMESTAMP)
+                WHERE LOWER(code)=LOWER(?) AND active=1
+                AND (NULLIF(starts_at, '') IS NULL OR NULLIF(starts_at, '')::timestamp <= CURRENT_TIMESTAMP)
+                AND (NULLIF(ends_at, '') IS NULL OR NULLIF(ends_at, '')::timestamp >= CURRENT_TIMESTAMP)
                 AND (usage_limit IS NULL OR used_count<usage_limit)""", (coupon_code,)).fetchone()
             if not promotion:
                 connection.rollback()
