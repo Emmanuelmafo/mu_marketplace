@@ -15,7 +15,8 @@ from flask import (
     url_for,
     flash,
     session,
-    current_app
+    current_app,
+    send_from_directory
 )
 
 from werkzeug.utils import secure_filename
@@ -150,25 +151,51 @@ def create_app():
             "Set SECRET_KEY in your environment or Config."
         )
 
-    # Product image upload settings
+    # Product and profile image uploads.
+    # Vercel's deployed source directory is read-only, so use /tmp there.
+    # Local development continues using static/uploads as before.
+    if os.environ.get("VERCEL"):
+        upload_storage_root = os.path.join(
+            os.environ.get("TMPDIR", "/tmp"),
+            "mu_marketplace_uploads"
+        )
+    else:
+        upload_storage_root = os.path.join(
+            app.root_path,
+            "static",
+            "uploads"
+        )
+
+    app.config["UPLOAD_STORAGE_ROOT"] = upload_storage_root
     app.config["UPLOAD_FOLDER"] = os.path.join(
-        app.root_path,
-        "static",
-        "uploads",
+        upload_storage_root,
         "products"
     )
-
+    app.config["PROFILE_UPLOAD_FOLDER"] = os.path.join(
+        upload_storage_root,
+        "profile_pictures"
+    )
     app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024
 
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-
-    app.config["PROFILE_UPLOAD_FOLDER"] = os.path.join(
-        app.root_path,
-        "static",
-        "uploads",
-        "profile_pictures"
-    )
     os.makedirs(app.config["PROFILE_UPLOAD_FOLDER"], exist_ok=True)
+
+    # Keep existing template URLs (static/uploads/...) working for files
+    # written to /tmp on Vercel. These temporary files are not persistent
+    # across serverless instances; durable image storage is handled separately.
+    if os.environ.get("VERCEL"):
+        original_static_view = app.view_functions.get("static")
+
+        def serve_static_or_uploaded_file(filename):
+            if filename.startswith("uploads/"):
+                relative_path = filename[len("uploads/"):]
+                return send_from_directory(
+                    app.config["UPLOAD_STORAGE_ROOT"],
+                    relative_path
+                )
+            return original_static_view(filename)
+
+        app.view_functions["static"] = serve_static_or_uploaded_file
 
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
     MAX_PRODUCT_IMAGES = 5
