@@ -19,7 +19,9 @@ select{padding:11px;border:1px solid #d8d4e5;border-radius:8px;font:inherit}
 button{background:#2e05c2;color:white;border:0;border-radius:8px;padding:12px 18px;font-weight:bold;cursor:pointer;align-self:flex-end}
 .notice{padding:12px 16px;color:#645d79;font-size:13px;line-height:1.5}
 @media(max-width:550px){.message{max-width:95%}main{margin:15px auto}}
-</style></head><body>
+</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+</head><body>
 <header><a href="{{ url_for('message_inbox') }}">← Back to messages</a></header>
 <main><section class="chatbox">
 <div class="chathead"><h1>{{ conversation.product_name }}</h1>
