@@ -222,6 +222,49 @@ def create_app():
     # Initialize database
     init_db()
 
+    # Optional one-time admin bootstrap for hosted deployments.
+    # Set ADMIN_BOOTSTRAP_NAME, ADMIN_BOOTSTRAP_EMAIL and
+    # ADMIN_BOOTSTRAP_PASSWORD in the hosting environment. Never commit
+    # the password to source control.
+    admin_name = os.environ.get("ADMIN_BOOTSTRAP_NAME", "").strip()
+    admin_email = os.environ.get("ADMIN_BOOTSTRAP_EMAIL", "").strip().lower()
+    admin_password = os.environ.get("ADMIN_BOOTSTRAP_PASSWORD", "")
+    if admin_name and admin_email and admin_password:
+        if "@" not in admin_email or len(admin_password) < 12:
+            raise RuntimeError(
+                "Admin bootstrap requires a valid email and a password "
+                "of at least 12 characters."
+            )
+        bootstrap_db = get_db_connection()
+        try:
+            existing_admin = bootstrap_db.execute(
+                """
+                SELECT id FROM users
+                WHERE LOWER(email)=? AND role='admin'
+                  AND COALESCE(is_deleted,0)=0
+                """,
+                (admin_email,)
+            ).fetchone()
+            if not existing_admin:
+                bootstrap_db.execute(
+                    """
+                    INSERT INTO users(full_name,email,phone,password_hash,role)
+                    VALUES(?,?, '', ?, 'admin')
+                    """,
+                    (
+                        admin_name,
+                        admin_email,
+                        generate_password_hash(admin_password)
+                    )
+                )
+                bootstrap_db.commit()
+        except Exception:
+            bootstrap_db.rollback()
+            current_app.logger.exception("Admin bootstrap failed")
+            raise
+        finally:
+            bootstrap_db.close()
+
     @app.before_request
     def enforce_marketplace_open_status():
         if request.endpoint is None or request.endpoint == "static":
