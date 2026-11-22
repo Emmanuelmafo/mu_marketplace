@@ -7,10 +7,9 @@ class Config:
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     INSTANCE_DIR = os.path.join(BASE_DIR, "instance")
 
-    # Database settings. Local development uses SQLite; Vercel uses Turso.
+    # Database settings. Local development uses SQLite; Vercel uses Neon.
     DATABASE_PATH = os.path.join(INSTANCE_DIR, "marketplace.db")
-    TURSO_DATABASE_URL = os.environ.get("TURSO_DATABASE_URL")
-    TURSO_AUTH_TOKEN = os.environ.get("TURSO_AUTH_TOKEN")
+    DATABASE_URL = os.environ.get("DATABASE_URL")
 
     # Flask security
     SECRET_KEY = os.environ.get(
