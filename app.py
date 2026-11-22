@@ -245,22 +245,28 @@ def create_app():
                 """,
                 (admin_email,)
             ).fetchone()
-            if not existing_admin:
+            password_hash = generate_password_hash(admin_password)
+            if existing_admin:
+                bootstrap_db.execute(
+                    """
+                    UPDATE users
+                    SET password_hash = ?, full_name = ?
+                    WHERE id = ?
+                    """,
+                    (password_hash, admin_name, existing_admin["id"])
+                )
+            else:
                 bootstrap_db.execute(
                     """
                     INSERT INTO users(full_name,email,phone,password_hash,role)
                     VALUES(?,?, '', ?, 'admin')
                     """,
-                    (
-                        admin_name,
-                        admin_email,
-                        generate_password_hash(admin_password)
-                    )
+                    (admin_name, admin_email, password_hash)
                 )
-                bootstrap_db.commit()
+            bootstrap_db.commit()
         except Exception:
             bootstrap_db.rollback()
-            current_app.logger.exception("Admin bootstrap failed")
+            app.logger.exception("Admin bootstrap failed")
             raise
         finally:
             bootstrap_db.close()
