@@ -484,6 +484,11 @@ def init_db():
     connection = get_db_connection()
 
     try:
+        # Several Vercel instances can cold-start at the same time. Serialize
+        # schema initialization so concurrent requests cannot race CREATE TABLE.
+        if getattr(connection, "is_postgres", False):
+            connection.execute("SELECT pg_advisory_xact_lock(731904221)")
+
         connection.execute("PRAGMA foreign_keys = OFF")
 
         connection.execute("""
