@@ -834,6 +834,12 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_promotions_active ON promotion_codes(active, code);
         """)
 
+        # Preserve SQLite's case-insensitive promotion-code matching in PostgreSQL.
+        connection.execute("""
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_promotion_codes_code_ci
+            ON promotion_codes(LOWER(code))
+        """)
+
         # Global marketplace availability switch (closed by default only if explicitly set).
         connection.execute("""
             CREATE TABLE IF NOT EXISTS marketplace_settings (
