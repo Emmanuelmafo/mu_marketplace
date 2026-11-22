@@ -16,7 +16,9 @@ main{max-width:1100px;margin:30px auto;padding:0 5%}h1{color:#24105f;margin-bott
 .actions a,.actions button{border:0;border-radius:7px;padding:9px 12px;text-decoration:none;background:#2e05c2;color:white;cursor:pointer;font-size:13px}
 .actions button{background:#eeeaf8;color:#2e05c2}
 .empty{background:white;border-radius:12px;padding:35px;text-align:center;color:#777}.empty a{display:inline-flex;align-items:center;justify-content:center;min-height:46px;margin-top:8px;padding:11px 22px;border-radius:9px;background:#2e05c2;color:white;text-decoration:none;font-weight:700;box-shadow:0 3px 8px rgba(46,5,194,.18);transition:background .2s,transform .2s,box-shadow .2s}.empty a:hover{background:#210391;transform:translateY(-2px);box-shadow:0 5px 12px rgba(46,5,194,.24)}
-</style></head><body>
+</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+</head><body>
 <header><a href="{{ url_for('buyer_dashboard') }}">← Back to My Dashboard</a></header>
 <main><h1>♡ Watchlist</h1><p class="intro">Keep tabs on products you want to check again later.</p>
 {% if products %}
