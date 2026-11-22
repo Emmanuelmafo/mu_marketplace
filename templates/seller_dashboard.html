@@ -726,3 +726,50 @@ document.addEventListener('DOMContentLoaded', function () {
 <script src="{{ url_for('static', filename='js/pull-to-refresh.js') }}" defer></script>
 </body>
 </html>
+
+
+<!-- Keep dashboard content in the same sequence on desktop and mobile -->
+<style id="mu-dashboard-sequence">
+@media (max-width: 900px) {
+  .stats-grid,
+  .dashboard-grid,
+  .finance-grid,
+  .admin-section-nav,
+  .tracking-steps,
+  .tracking-status-grid {
+    direction: ltr !important;
+    grid-auto-flow: row !important;
+  }
+
+  .stats-grid > *,
+  .dashboard-grid > *,
+  .finance-grid > *,
+  .admin-section-nav > *,
+  .tracking-steps > *,
+  .tracking-status-grid > * {
+    order: 0 !important;
+    direction: ltr !important;
+  }
+
+  .stats-grid,
+  .dashboard-grid,
+  .finance-grid,
+  .admin-section-nav,
+  .tracking-status-grid {
+    align-items: stretch;
+  }
+
+  /* When cards stack, retain their original HTML order. */
+  .stats-grid,
+  .dashboard-grid,
+  .finance-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .dashboard-grid,
+  .finance-grid,
+  .stats-grid {
+    flex-direction: column !important;
+  }
+}
+</style>
