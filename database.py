@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import re
 
 from config import Config
 
@@ -21,8 +22,9 @@ class _CompatRow(dict):
 
 
 class _CompatCursor:
-    def __init__(self, cursor):
+    def __init__(self, cursor, lastrowid=None):
         self._cursor = cursor
+        self._lastrowid = lastrowid
 
     @property
     def description(self):
@@ -30,6 +32,8 @@ class _CompatCursor:
 
     @property
     def lastrowid(self):
+        if self._lastrowid is not None:
+            return self._lastrowid
         return getattr(self._cursor, "lastrowid", None)
 
     @property
@@ -60,27 +64,151 @@ class _CompatCursor:
             yield self._convert(row)
 
 
-class _TursoConnection:
-    """Small DB-API compatibility layer for the remote libSQL Python client."""
+def _translate_postgres_sql(sql):
+    """Translate the SQLite SQL features used by this application."""
+    import re
+
+    statement = sql.strip().rstrip(";")
+    ignore_conflict = bool(re.match(r"INSERT\s+OR\s+IGNORE\s+INTO", statement, re.I))
+    statement = re.sub(
+        r"INSERT\s+OR\s+IGNORE\s+INTO",
+        "INSERT INTO",
+        statement,
+        flags=re.I
+    )
+    statement = re.sub(r"\bBEGIN\s+IMMEDIATE\b", "BEGIN", statement, flags=re.I)
+    statement = re.sub(
+        r"INTEGER\s+PRIMARY\s+KEY\s+AUTOINCREMENT",
+        "SERIAL PRIMARY KEY",
+        statement,
+        flags=re.I
+    )
+
+    # PostgreSQL does not have SQLite's NOCASE collation.
+    statement = re.sub(
+        r"([A-Za-z_][A-Za-z0-9_]*)\s*=\s*\?\s+COLLATE\s+NOCASE",
+        r"LOWER(\1) = LOWER(?)",
+        statement,
+        flags=re.I
+    )
+    statement = re.sub(
+        r"([A-Za-z_][A-Za-z0-9_]*)\s+COLLATE\s+NOCASE\s+(ASC|DESC)",
+        r"LOWER(\1) \2",
+        statement,
+        flags=re.I
+    )
+    statement = re.sub(r"\s+COLLATE\s+NOCASE\b", "", statement, flags=re.I)
+
+    # Translate SQLite date arithmetic used by login throttling.
+    statement = re.sub(
+        r"datetime\(\s*'now'\s*,\s*'-(\d+)\s+(day|hour|minute)s?'\s*\)",
+        lambda m: "CURRENT_TIMESTAMP - INTERVAL '" + m.group(1) + " " + m.group(2) + "'",
+        statement,
+        flags=re.I
+    )
+
+    # PostgreSQL uses STRING_AGG rather than GROUP_CONCAT.
+    statement = re.sub(
+        r"GROUP_CONCAT\((.+?),\s*'([^']*)'\)",
+        r"STRING_AGG(\1, '\2')",
+        statement,
+        flags=re.I | re.S
+    )
+
+    statement = statement.replace("?", "%s")
+
+    if ignore_conflict:
+        statement += " ON CONFLICT DO NOTHING"
+
+    # Preserve SQLite's lastrowid behavior for tables with an id column.
+    insert_match = re.match(r"INSERT\s+INTO\s+([A-Za-z_][A-Za-z0-9_]*)", statement, re.I)
+    if (
+        insert_match
+        and insert_match.group(1).lower() != "marketplace_settings"
+        and not re.search(r"\bRETURNING\b", statement, re.I)
+    ):
+        statement += " RETURNING id"
+
+    return statement
+
+
+class _PostgresConnection:
+    """DB-API compatibility layer for Neon PostgreSQL."""
+
+    is_postgres = True
 
     def __init__(self, connection):
         self._connection = connection
 
-    def execute(self, sql, parameters=()):
-        # Foreign-key enforcement is enabled by the hosted SQLite-compatible
-        # database. Ignore connection-local toggles that are not meaningful
-        # for the remote HTTP connection.
+    def _pragma(self, sql):
+        import re
+        from psycopg2.extras import RealDictCursor
+
+        match = re.match(r"PRAGMA\s+table_info\(([^)]+)\)", sql.strip(), re.I)
+        if match:
+            table = match.group(1).strip(" \\"'")
+            cursor = self._connection.cursor(cursor_factory=RealDictCursor)
+            cursor.execute(
+                """
+                SELECT
+                    column_name AS name,
+                    data_type AS type,
+                    (is_nullable = 'NO') AS notnull,
+                    column_default AS dflt_value,
+                    ordinal_position AS cid
+                FROM information_schema.columns
+                WHERE table_schema = 'public' AND table_name = %s
+                ORDER BY ordinal_position
+                """,
+                (table,)
+            )
+            return _CompatCursor(cursor)
+
         normalized = " ".join(sql.strip().lower().split())
         if normalized in ("pragma foreign_keys = on", "pragma foreign_keys = off"):
-            return _CompatCursor(self._connection.execute("SELECT 1"))
-        return _CompatCursor(self._connection.execute(sql, parameters or ()))
+            cursor = self._connection.cursor(cursor_factory=RealDictCursor)
+            cursor.execute("SELECT 1")
+            return _CompatCursor(cursor)
+
+        # The old email-uniqueness migration is SQLite-specific and is not
+        # needed when initializing the new Neon database.
+        if normalized.startswith("pragma index_list") or normalized.startswith("pragma index_info"):
+            cursor = self._connection.cursor(cursor_factory=RealDictCursor)
+            cursor.execute("SELECT NULL::text AS name, FALSE AS unique WHERE FALSE")
+            return _CompatCursor(cursor)
+
+        return None
+
+    def execute(self, sql, parameters=()):
+        from psycopg2.extras import RealDictCursor
+
+        if sql.lstrip().upper().startswith("PRAGMA"):
+            result = self._pragma(sql)
+            if result is not None:
+                return result
+
+        translated = _translate_postgres_sql(sql)
+        cursor = self._connection.cursor(cursor_factory=RealDictCursor)
+        cursor.execute(translated, parameters or ())
+
+        lastrowid = None
+        if re.match(r"INSERT\s+INTO", translated, re.I) and cursor.description:
+            returned = cursor.fetchone()
+            if returned:
+                lastrowid = returned.get("id")
+
+        return _CompatCursor(cursor, lastrowid=lastrowid)
 
     def executemany(self, sql, seq_of_parameters):
-        return _CompatCursor(self._connection.executemany(sql, seq_of_parameters))
+        from psycopg2.extras import RealDictCursor
+
+        translated = _translate_postgres_sql(sql)
+        translated = re.sub(r"\s+RETURNING\s+id\s*$", "", translated, flags=re.I)
+        cursor = self._connection.cursor(cursor_factory=RealDictCursor)
+        cursor.executemany(translated, seq_of_parameters)
+        return _CompatCursor(cursor)
 
     def executescript(self, script):
-        # libSQL's HTTP client does not expose sqlite3.executescript().
-        # Execute complete SQLite statements individually instead.
         statement = ""
         for line in script.splitlines(True):
             statement += line
@@ -94,7 +222,8 @@ class _TursoConnection:
         return None
 
     def cursor(self):
-        return _CompatCursor(self._connection.cursor())
+        from psycopg2.extras import RealDictCursor
+        return _CompatCursor(self._connection.cursor(cursor_factory=RealDictCursor))
 
     def commit(self):
         return self._connection.commit()
@@ -107,32 +236,27 @@ class _TursoConnection:
 
 
 def get_db_connection():
-    """Use Turso in production and the existing local SQLite file in development."""
-    turso_url = os.environ.get("TURSO_DATABASE_URL")
-    turso_token = os.environ.get("TURSO_AUTH_TOKEN")
+    """Use Neon PostgreSQL in production and SQLite for local development."""
+    database_url = os.environ.get("DATABASE_URL") or getattr(Config, "DATABASE_URL", None)
 
-    if turso_url:
-        if not turso_token:
-            raise RuntimeError(
-                "TURSO_AUTH_TOKEN is required when TURSO_DATABASE_URL is configured."
-            )
+    if database_url:
         try:
-            import libsql
+            import psycopg2
         except ImportError as error:
             raise RuntimeError(
-                "The libsql package is missing. Install the project requirements."
+                "The psycopg2 package is missing. Install the project requirements."
             ) from error
 
-        connection = libsql.connect(
-            database=turso_url,
-            auth_token=turso_token,
+        connection = psycopg2.connect(
+            database_url,
+            connect_timeout=10,
+            sslmode="require"
         )
-        return _TursoConnection(connection)
+        return _PostgresConnection(connection)
 
     if os.environ.get("VERCEL"):
         raise RuntimeError(
-            "Turso is not configured. Set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN "
-            "in the Vercel project environment variables."
+            "Neon is not configured. Set DATABASE_URL in the Vercel project environment variables."
         )
 
     os.makedirs(Config.INSTANCE_DIR, exist_ok=True)
@@ -148,6 +272,8 @@ def migrate_users_table(connection):
     with email + role uniqueness.
     Preserve existing user IDs and related records.
     """
+    if getattr(connection, "is_postgres", False):
+        return
 
     columns = connection.execute(
         "PRAGMA table_info(users)"
