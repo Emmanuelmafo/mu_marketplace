@@ -193,7 +193,7 @@ def create_app():
                     app.config["UPLOAD_STORAGE_ROOT"],
                     relative_path
                 )
-            return original_static_view(filename)
+            return original_static_view(filename=filename)
 
         app.view_functions["static"] = serve_static_or_uploaded_file
 
