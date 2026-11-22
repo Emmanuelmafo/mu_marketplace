@@ -480,6 +480,7 @@
 
         <form class="search home-filter-search" action="{{ url_for('home') }}" method="get" role="search">
             <div class="home-search-main">
+                <img class="home-search-logo" src="{{ url_for('static', filename='images/branding/search-icon.png') }}" alt="" aria-hidden="true">
                 <input type="search" name="q" value="{{ search or '' }}"
                        placeholder="Search products..." aria-label="Search for products">
                 <button type="submit" class="home-search-submit" aria-label="Search">
@@ -950,6 +951,22 @@ document.addEventListener('DOMContentLoaded', function () {
   .marketplace-sticky-header > .brand-lockup h1 { font-size:12px !important; }
   .marketplace-sticky-header > .brand-lockup img { width:34px !important; height:34px !important; }
   .marketplace-sticky-header > .buy-from-abroad-button { font-size:10px; padding:7px 7px !important; }
+}
+</style>
+
+<style>
+/* Show the marketplace search mark inside the homepage search field. */
+.home-search-main { padding-left:15px !important; }
+.home-search-logo {
+  display:block;
+  width:21px !important;
+  height:21px !important;
+  flex:0 0 21px;
+  object-fit:contain;
+  opacity:.78;
+}
+@media(max-width:600px) {
+  .home-search-logo { width:19px !important; height:19px !important; flex-basis:19px; }
 }
 </style>
 
