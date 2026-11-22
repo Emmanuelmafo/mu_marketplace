@@ -415,11 +415,8 @@
         <a href="{{ url_for('buy_from_abroad') }}" class="buy-from-abroad-button" style="display:inline-flex;align-items:center;justify-content:center;padding:9px 14px;margin:8px;background:#14532d;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;">Buy from Abroad</a>
 
         <div class="home-header-actions">
-            <button class="header-search-toggle" id="headerSearchToggle" type="button"
-                    aria-label="Open product search" aria-expanded="false" title="Search products">
-                <img src="{{ url_for('static', filename='images/branding/search-icon.png') }}" alt="">
-            </button>
-            <form class="header-quick-search" id="headerQuickSearch" action="{{ url_for('home') }}" method="get" role="search">
+            <form class="header-quick-search header-visible-search" id="headerQuickSearch" action="{{ url_for('home') }}" method="get" role="search">
+                <img src="{{ url_for('static', filename='images/branding/search-icon.png') }}" alt="" aria-hidden="true">
                 <input type="search" name="q" placeholder="Search products..." aria-label="Search products">
                 <button type="submit" aria-label="Submit search">Search</button>
             </form>
@@ -967,6 +964,60 @@ document.addEventListener('DOMContentLoaded', function () {
 }
 @media(max-width:600px) {
   .home-search-logo { width:19px !important; height:19px !important; flex-basis:19px; }
+}
+</style>
+
+<style>
+/* Keep the full search field visible in the homepage header on desktop and mobile. */
+.header-visible-search {
+  display:flex !important;
+  flex:1 1 230px;
+  min-width:145px;
+  max-width:360px;
+  position:static;
+  padding:5px 6px 5px 11px;
+  gap:7px;
+  background:#fff;
+  border:1px solid #dce8df;
+  border-radius:999px;
+}
+.header-visible-search > img {
+  display:block;
+  width:19px;
+  height:19px;
+  flex:0 0 19px;
+  object-fit:contain;
+}
+.header-visible-search input {
+  flex:1;
+  width:auto !important;
+  min-width:0;
+  padding:8px 2px !important;
+  font-size:13px;
+}
+.header-visible-search button {
+  flex:0 0 auto;
+  padding:8px 11px;
+  border:0;
+  border-radius:999px;
+  background:#123c2c;
+  color:#fff;
+  font-weight:700;
+}
+@media(max-width:650px) {
+  .marketplace-sticky-header > .home-header-actions {
+    flex:1 1 auto !important;
+    min-width:0;
+  }
+  .header-visible-search {
+    flex:1 1 100%;
+    max-width:none;
+    min-width:0;
+    order:1;
+  }
+  .marketplace-sticky-header .mobile-menu-toggle { order:2; }
+  .header-visible-search input { font-size:12px !important; }
+  .header-visible-search button { padding:7px 9px; font-size:12px; }
 }
 </style>
 
