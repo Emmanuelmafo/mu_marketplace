@@ -1,11 +1,22 @@
-const CACHE_NAME = "mu-marketplace-static-v5";
+const CACHE_NAME = "mu-marketplace-static-v6";
 const STATIC_ASSETS = [
   "/static/css/style.css",
   "/static/js/pull-to-refresh.js",
+  "/static/js/script.js",
+  "/static/images/branding/mu-marketplace-logo.png",
+  "/static/images/branding/search-icon.png",
   "/static/images/categories/all.webp",
+  "/static/images/categories/accessories.webp",
+  "/static/images/categories/beauty.webp",
+  "/static/images/categories/books.webp",
+  "/static/images/categories/electronics.webp",
+  "/static/images/categories/fashion.webp",
+  "/static/images/categories/groceries.webp",
+  "/static/images/categories/home.webp",
+  "/static/images/categories/sports.webp",
   "/static/images/pwa/icon-192.png",
   "/static/images/pwa/icon-512.png",
-  "/static/images/branding/search-icon.png"
+  "/static/images/pwa/icon-512-maskable.png"
 ];
 
 self.addEventListener("install", (event) => {
