@@ -1,17 +1,144 @@
-
-import sqlite3
 import os
+import sqlite3
 
 from config import Config
 
 
-def get_db_connection():
-    os.makedirs(Config.INSTANCE_DIR, exist_ok=True)
+class _CompatRow(dict):
+    """SQLite-style row supporting both row['column'] and row[0]."""
 
+    def __init__(self, columns, values):
+        super().__init__(zip(columns, values))
+        self._values = tuple(values)
+
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return self._values[key]
+        return super().__getitem__(key)
+
+    def keys(self):
+        return super().keys()
+
+
+class _CompatCursor:
+    def __init__(self, cursor):
+        self._cursor = cursor
+
+    @property
+    def description(self):
+        return self._cursor.description
+
+    @property
+    def lastrowid(self):
+        return getattr(self._cursor, "lastrowid", None)
+
+    @property
+    def rowcount(self):
+        return getattr(self._cursor, "rowcount", -1)
+
+    def _convert(self, row):
+        if row is None:
+            return None
+        description = self.description or ()
+        columns = [item[0] for item in description]
+        if isinstance(row, dict):
+            return _CompatRow(columns or list(row.keys()), list(row.values()))
+        return _CompatRow(columns, row)
+
+    def fetchone(self):
+        return self._convert(self._cursor.fetchone())
+
+    def fetchall(self):
+        return [self._convert(row) for row in self._cursor.fetchall()]
+
+    def fetchmany(self, size=None):
+        rows = self._cursor.fetchmany() if size is None else self._cursor.fetchmany(size)
+        return [self._convert(row) for row in rows]
+
+    def __iter__(self):
+        for row in self._cursor:
+            yield self._convert(row)
+
+
+class _TursoConnection:
+    """Small DB-API compatibility layer for the remote libSQL Python client."""
+
+    def __init__(self, connection):
+        self._connection = connection
+
+    def execute(self, sql, parameters=()):
+        # Foreign-key enforcement is enabled by the hosted SQLite-compatible
+        # database. Ignore connection-local toggles that are not meaningful
+        # for the remote HTTP connection.
+        normalized = " ".join(sql.strip().lower().split())
+        if normalized in ("pragma foreign_keys = on", "pragma foreign_keys = off"):
+            return _CompatCursor(self._connection.execute("SELECT 1"))
+        return _CompatCursor(self._connection.execute(sql, parameters or ()))
+
+    def executemany(self, sql, seq_of_parameters):
+        return _CompatCursor(self._connection.executemany(sql, seq_of_parameters))
+
+    def executescript(self, script):
+        # libSQL's HTTP client does not expose sqlite3.executescript().
+        # Execute complete SQLite statements individually instead.
+        statement = ""
+        for line in script.splitlines(True):
+            statement += line
+            if sqlite3.complete_statement(statement):
+                sql = statement.strip()
+                if sql:
+                    self.execute(sql)
+                statement = ""
+        if statement.strip():
+            self.execute(statement)
+        return None
+
+    def cursor(self):
+        return _CompatCursor(self._connection.cursor())
+
+    def commit(self):
+        return self._connection.commit()
+
+    def rollback(self):
+        return self._connection.rollback()
+
+    def close(self):
+        return self._connection.close()
+
+
+def get_db_connection():
+    """Use Turso in production and the existing local SQLite file in development."""
+    turso_url = os.environ.get("TURSO_DATABASE_URL")
+    turso_token = os.environ.get("TURSO_AUTH_TOKEN")
+
+    if turso_url:
+        if not turso_token:
+            raise RuntimeError(
+                "TURSO_AUTH_TOKEN is required when TURSO_DATABASE_URL is configured."
+            )
+        try:
+            import libsql
+        except ImportError as error:
+            raise RuntimeError(
+                "The libsql package is missing. Install the project requirements."
+            ) from error
+
+        connection = libsql.connect(
+            database=turso_url,
+            auth_token=turso_token,
+        )
+        return _TursoConnection(connection)
+
+    if os.environ.get("VERCEL"):
+        raise RuntimeError(
+            "Turso is not configured. Set TURSO_DATABASE_URL and TURSO_AUTH_TOKEN "
+            "in the Vercel project environment variables."
+        )
+
+    os.makedirs(Config.INSTANCE_DIR, exist_ok=True)
     connection = sqlite3.connect(Config.DATABASE_PATH)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")
-
     return connection
 
 

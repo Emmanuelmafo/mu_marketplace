@@ -32,8 +32,3 @@ static/uploads/
 # Operating system files
 .DS_Store
 Thumbs.db
-# Backup and temporary files
-merge_backup/
-*.bak
-*.tmp
-__pycache__/

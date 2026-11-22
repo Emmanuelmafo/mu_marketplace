@@ -2,6 +2,31 @@
 from database import get_db_connection
 
 
+def _notify_admin_product_approval(connection, seller_id, product_id, product_name, event="submitted"):
+    """Notify the admin when a product is awaiting approval."""
+    seller = connection.execute(
+        "SELECT full_name FROM users WHERE id = ?",
+        (seller_id,)
+    ).fetchone()
+    seller_name = seller["full_name"] if seller else f"Seller #{seller_id}"
+
+    title = "Product awaiting approval"
+    message = (
+        f"{seller_name} {event} product '{product_name}' "
+        f"(Product ID: {product_id}). Please review it in Seller & Product Approvals."
+    )
+
+    connection.execute(
+        """
+        INSERT INTO notifications (
+            user_id, audience_role, title, message
+        )
+        VALUES (NULL, 'admin', ?, ?)
+        """,
+        (title, message)
+    )
+
+
 def get_categories():
     connection = get_db_connection()
 
@@ -65,9 +90,13 @@ def add_product(
                 VALUES (?, ?)
             """, (product_id, image_path))
 
+        _notify_admin_product_approval(
+            connection, seller_id, product_id, name, event="listed"
+        )
+
         connection.commit()
 
-        return True, "Product submitted successfully. It will appear publicly after seller verification and admin product approval."
+        return True, "Product submitted successfully. The admin has been notified and must approve it before it appears publicly."
 
     except Exception as error:
         connection.rollback()
@@ -224,9 +253,13 @@ def update_product(
                 seller_id
             ))
 
+        _notify_admin_product_approval(
+            connection, seller_id, product_id, name, event="updated and resubmitted"
+        )
+
         connection.commit()
 
-        return True, "Product updated successfully!"
+        return True, "Product updated successfully and resubmitted for admin approval."
 
     except Exception as error:
         connection.rollback()
