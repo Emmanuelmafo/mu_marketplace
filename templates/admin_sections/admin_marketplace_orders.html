@@ -1,0 +1,156 @@
+<section class="section">
+
+        <div class="section-heading">
+            <h2>Marketplace Orders</h2>
+            <p>View order records, buyer details, ordered products, pickup locations, payments and deliveries.</p>
+        </div>
+
+        <div class="table-container">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order Number</th>
+                        <th>Buyer</th>
+                        <th>Buyer Email</th>
+                        <th>Buyer Phone</th>
+                        <th>Ordered Products & Pickup Locations</th>
+                        <th>Delivery Address</th>
+                        <th>Order Total</th>
+                        <th>Payment Method</th>
+                        <th>Payment Status</th>
+                        <th>Order Status</th>
+                        <th>Delivery Status</th>
+                        <th>Delivery Fee</th>
+                        <th>Date</th>
+                        <th>Admin Tracking Controls</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for order in orders %}
+
+                    <tr>
+                        <td>{{ order.order_number }}</td>
+
+                        <td>{{ order.buyer_name }}</td>
+
+                        <td>{{ order.buyer_email }}</td>
+
+                        <td>{{ order.buyer_phone }}</td>
+
+                        <td>
+                            {% for item in order["items"] %}
+
+                                <div style="margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid #eeeaf8;">
+
+                                    <strong>
+                                        {{ item.product_name }}
+                                    </strong>
+
+                                    <p style="margin-top: 5px;">
+                                        Quantity: {{ item.quantity }}
+                                    </p>
+
+                                    <p style="margin-top: 5px;">
+                                        Unit Price:
+                                        K{{ "%.2f"|format(item.unit_price|float) }}
+                                    </p>
+
+                                    <p style="margin-top: 5px;">
+                                        <strong>Pickup Location:</strong>
+                                    </p>
+
+                                    <p style="margin-top: 4px; color: #2e05c2;">
+                                        {{ item.pickup_location or "Not provided" }}
+                                    </p>
+                                    <p style="margin-top: 7px;"><strong>Seller:</strong> {{ item.seller_name or "Unavailable" }}</p>
+                                    <p><strong>Seller Email:</strong> {{ item.seller_email or "Not provided" }}</p>
+                                    <p><strong>Seller Phone:</strong> {{ item.seller_phone or "Not provided" }}</p>
+
+                                </div>
+
+                            {% else %}
+
+                                <span>No products found.</span>
+
+                            {% endfor %}
+                        </td>
+
+                        <td>
+                            {{ order.delivery_address or "Not provided" }}
+                        </td>
+
+                        <td>
+                            K{{ "%.2f"|format(order.total_amount|float) }}
+                        </td>
+
+                        <td>
+                            {{ order.payment_method or "Not recorded" }}
+                        </td>
+
+                        <td>
+                            <span class="status">
+                                {{ order.payment_status or "Not recorded" }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="status">
+                                {{ order.order_status }}
+                            </span>
+                        </td>
+
+                        <td>
+                            {{ order.delivery_status or "Not assigned" }}
+                        </td>
+
+                        <td>
+                            K{{ "%.2f"|format((order.delivery_fee or 0)|float) }}
+                        </td>
+
+                        <td>
+                            {{ order.created_at }}
+                        </td>
+                        <td style="min-width:250px;">
+                            <form method="post" class="admin-tracking-form" action="{{ url_for('admin_update_order', order_id=order.order_id) }}">
+                                <div class="tracking-control-group"><strong>01 · Order progress</strong>
+                                    <label style="display:block;margin-top:6px;"><input type="checkbox" checked disabled> Processing</label>
+                                    <label style="display:block;margin-top:6px;"><input type="checkbox" name="order_confirmed" value="yes" {% if order.order_status in ('confirmed','completed') %}checked{% endif %}> Order confirmed</label>
+                                    <label style="display:block;margin-top:6px;"><input type="checkbox" name="order_completed" value="yes" {% if order.order_status == 'completed' %}checked{% endif %}> Order completed</label>
+                                </div>
+                                <div class="tracking-control-group"><strong>02 · Payment method</strong>
+                                    <label style="display:block;margin-top:6px;"><input type="radio" name="payment_method" value="cash" {% if order.payment_method == 'cash' or not order.payment_method %}checked{% endif %}> Cash</label>
+                                    <label style="display:block;margin-top:6px;"><input type="radio" name="payment_method" value="mobile_money" {% if order.payment_method == 'mobile_money' %}checked{% endif %}> Mobile Money</label>
+                                </div>
+                                <div class="tracking-control-group"><strong>04 · Payment confirmation</strong><label>Payment received<br>
+                                    <input type="checkbox" name="payment_received" value="yes" {% if order.payment_status in ('paid','completed') %}checked{% endif %}>
+                                    Payment received
+                                </label></div>
+                                <div class="tracking-control-group"><strong>03 · Delivery progress</strong>
+                                    <label style="display:block;margin-top:6px;"><input type="checkbox" name="delivery_collected" value="yes" {% if order.delivery_status in ('collected','on_the_way','delivered') %}checked{% endif %}> Product collected from seller</label>
+                                    <label style="display:block;margin-top:6px;"><input type="checkbox" name="delivery_on_the_way" value="yes" {% if order.delivery_status in ('on_the_way','delivered') %}checked{% endif %}> On its way to buyer</label>
+                                    <label style="display:block;margin-top:6px;"><input type="checkbox" name="delivery_delivered" value="yes" {% if order.delivery_status == 'delivered' %}checked{% endif %}> Delivered to buyer</label>
+                                </div>
+                                <button type="submit" class="mark-paid-button">Save Tracking Updates</button>
+                            </form>
+                        </td>
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="14" class="empty">
+                            No marketplace orders found.
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        </div>
+
+    </section>

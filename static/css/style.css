@@ -1,0 +1,7 @@
+
+
+/* Clear, touch-friendly browse action below the homepage search bar. */
+.hero-browse-wrap{margin-top:22px;display:flex;justify-content:center}
+.hero-browse-button{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:48px;padding:12px 22px;border-radius:9px;background:#123c2c;color:#fff!important;text-decoration:none;font-weight:700;box-shadow:0 3px 9px rgba(18,60,44,.2);transition:background .2s,transform .2s,box-shadow .2s}
+.hero-browse-button:hover{background:#0b2d20;transform:translateY(-2px);box-shadow:0 5px 13px rgba(18,60,44,.26)}
+.hero-browse-button:focus-visible{outline:3px solid #9ac7b2;outline-offset:3px}

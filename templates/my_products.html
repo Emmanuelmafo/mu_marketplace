@@ -1,0 +1,481 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Products | MU Marketplace</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f5f9;
+            color: #222;
+        }
+
+        header {
+            background: #2e05c2;
+            color: white;
+            padding: 20px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 {
+            font-size: 22px;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.15);
+            padding: 10px 15px;
+            border-radius: 6px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 35px 7%;
+        }
+
+        .page-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+
+        .page-heading h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .page-heading p {
+            color: #777;
+        }
+
+        .button {
+            display: inline-block;
+            background: #2e05c2;
+            color: white;
+            text-decoration: none;
+            padding: 12px 18px;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .button:hover {
+            background: #21038f;
+        }
+
+        .messages {
+            margin-bottom: 22px;
+        }
+
+        .message {
+            background: #e8e4ff;
+            color: #2e05c2;
+            padding: 13px 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 18px;
+            margin-bottom: 35px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+            border-left: 4px solid #2e05c2;
+        }
+
+        .summary-card p {
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .summary-card h2 {
+            font-size: 25px;
+            color: #2e05c2;
+        }
+
+        .section-heading {
+            font-size: 21px;
+            margin-bottom: 18px;
+        }
+
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 7px 18px rgba(0,0,0,0.09);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 205px;
+            object-fit: cover;
+            background: #eee;
+            display: block;
+        }
+
+        .product-info {
+            padding: 20px;
+        }
+
+        .product-info h3 {
+            font-size: 18px;
+            margin-bottom: 13px;
+            color: #222;
+            overflow-wrap: anywhere;
+        }
+
+        .product-info p {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .price {
+            color: #2e05c2 !important;
+            font-size: 21px !important;
+            font-weight: bold;
+            margin: 14px 0 !important;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: capitalize;
+            background: #dff6e8;
+            color: #168044;
+        }
+
+        .status.inactive,
+        .status.pending {
+            background: #fff1d6;
+            color: #946200;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .edit-button,
+        .delete-button {
+            flex: 1;
+            border: none;
+            text-decoration: none;
+            padding: 11px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+
+        .edit-button {
+            background: #e8e4ff;
+            color: #2e05c2;
+        }
+
+        .edit-button:hover {
+            background: #2e05c2;
+            color: white;
+        }
+
+        .delete-button {
+            background: #ffe1e1;
+            color: #bd2525;
+        }
+
+        .delete-button:hover {
+            background: #bd2525;
+            color: white;
+        }
+
+        .delete-form {
+            flex: 1;
+            margin: 0;
+            display: flex;
+        }
+
+        .empty-state {
+            background: white;
+            padding: 55px 20px;
+            text-align: center;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .empty-state p {
+            color: #888;
+            margin-bottom: 22px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #888;
+            margin-top: 25px;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 18px 5%;
+            }
+
+            .container {
+                padding: 25px 5%;
+            }
+
+            .page-heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .page-heading .button {
+                width: 100%;
+                text-align: center;
+            }
+
+            .products {
+                grid-template-columns: 1fr;
+            }
+
+            .product-actions {
+                gap: 8px;
+            }
+
+            .edit-button,
+            .delete-button {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h2>MU Marketplace</h2>
+
+        <a class="back-btn" href="{{ url_for('seller_dashboard') }}">
+            Back to Dashboard
+        </a>
+    </header>
+
+    <main class="container">
+
+        <section class="page-heading">
+            <div>
+                <h1>My Products</h1>
+                <p>Welcome, {{ user_name }}. Manage your listed products.</p>
+            </div>
+
+            <a class="button" href="{{ url_for('add_product_page') }}">
+                + Add Product
+            </a>
+        </section>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="message">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% if products %}
+
+            {% set stats = namespace(
+                total=0,
+                active=0,
+                stock=0
+            ) %}
+
+            {% for product in products %}
+                {% set stats.total = stats.total + 1 %}
+                {% set stats.stock = stats.stock + (product["stock"] or 0) %}
+
+                {% if product["status"]|lower == "active" %}
+                    {% set stats.active = stats.active + 1 %}
+                {% endif %}
+            {% endfor %}
+
+            <section class="summary-grid">
+
+                <div class="summary-card">
+                    <p>Total Products</p>
+                    <h2>{{ stats.total }}</h2>
+                </div>
+
+                <div class="summary-card">
+                    <p>Active Products</p>
+                    <h2>{{ stats.active }}</h2>
+                </div>
+
+                <div class="summary-card">
+                    <p>Total Stock</p>
+                    <h2>{{ stats.stock }}</h2>
+                </div>
+
+            </section>
+
+            <h2 class="section-heading">Your Listed Products</h2>
+
+            <section class="products">
+
+                {% for product in products %}
+
+                    <article class="product-card">
+
+                        {% if product["image"] %}
+                            <img
+                                class="product-image"
+                                src="{{ url_for('static', filename=product['image']) }}"
+                                alt="{{ product['name'] }}"
+                            >
+                        {% else %}
+                            <img
+                                class="product-image"
+                                src="https://placehold.co/400x300?text=No+Image"
+                                alt="No product image"
+                            >
+                        {% endif %}
+
+                        <div class="product-info">
+
+                            <h3>{{ product["name"] }}</h3>
+
+                            <p>
+                                <strong>Category:</strong>
+                                {{ product["category_name"] or "Uncategorized" }}
+                            </p>
+
+                            <p>
+                                <strong>Stock:</strong>
+                                {{ product["stock"] }}
+                            </p>
+
+                            <p>
+                                <strong>Status:</strong>
+                                <span class="status {{ product['status']|lower }}">
+                                    {{ product["status"] }}
+                                </span>
+                            </p>
+
+                            <p class="price">
+                                K{{ "%.2f"|format(product["price"]) }}
+                            </p>
+
+                            <p>
+                                {{ product["description"] or "No description provided." }}
+                            </p>
+
+                            <div class="product-actions">
+
+                                <a
+                                    class="edit-button"
+                                    href="{{ url_for('edit_product_page', product_id=product['id']) }}"
+                                >
+                                    Edit Product
+                                </a>
+
+                                <form
+                                    class="delete-form"
+                                    action="{{ url_for('delete_product_page', product_id=product['id']) }}"
+                                    method="POST"
+                                    onsubmit="return confirm('Are you sure you want to delete this product? This action cannot be undone.');"
+                                >
+                                    <button
+                                        type="submit"
+                                        class="delete-button"
+                                    >
+                                        Delete Product
+                                    </button>
+                                </form>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                {% endfor %}
+
+            </section>
+
+        {% else %}
+
+            <section class="empty-state">
+                <h3>You haven't uploaded any products yet.</h3>
+                <p>Start by adding your first product to MU Marketplace.</p>
+
+                <a class="button" href="{{ url_for('add_product_page') }}">
+                    Upload Your First Product
+                </a>
+            </section>
+
+        {% endif %}
+
+    </main>
+
+    <footer>
+        &copy; 2026 MU Marketplace. All rights reserved.
+    </footer>
+
+<script src="{{ url_for('static', filename='js/pull-to-refresh.js') }}" defer></script>
+</body>
+</html>

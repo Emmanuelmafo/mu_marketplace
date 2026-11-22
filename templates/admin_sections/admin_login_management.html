@@ -1,0 +1,42 @@
+<section class="section admin-login-management">
+        <div class="section-heading">
+            <h2>Admin Login Management</h2>
+            <p>Change your own admin login details or create additional administrator logins. Every admin account opens this same dashboard.</p>
+        </div>
+
+        <div class="admin-login-grid">
+            <form class="admin-login-card" method="post" action="{{ url_for('admin_manage_logins') }}">
+                <h3>Change My Login Details</h3>
+                <input type="hidden" name="action" value="update_own">
+                <label>New email address</label>
+                <input type="email" name="new_email" value="{{ admin_accounts|selectattr('id','equalto',session.get('user_id'))|map(attribute='email')|first }}" required>
+                <label>New password <small>(leave blank to keep current password)</small></label>
+                <input type="password" name="new_password" minlength="8" placeholder="Enter a new password">
+                <label>Current password to confirm changes</label>
+                <input type="password" name="current_password" required>
+                <button type="submit">Update My Login</button>
+            </form>
+
+            <form class="admin-login-card" method="post" action="{{ url_for('admin_manage_logins') }}">
+                <h3>Add Another Admin Login</h3>
+                <input type="hidden" name="action" value="add_admin">
+                <label>Administrator name</label>
+                <input type="text" name="full_name" required>
+                <label>New admin email</label>
+                <input type="email" name="email" required>
+                <label>Temporary password (at least 8 characters)</label>
+                <input type="password" name="password" minlength="8" required>
+                <button type="submit">Create Admin Login</button>
+            </form>
+        </div>
+
+        <div class="admin-login-list">
+            <h3>Administrator Accounts</h3>
+            {% for admin_account in admin_accounts %}
+            <div class="admin-login-row">
+                <span><strong>{{ admin_account.full_name }}</strong><small>{{ admin_account.email }}</small></span>
+                {% if admin_account.id == session.get('user_id') %}<span class="admin-current-tag">Current login</span>{% else %}<span class="admin-current-tag">Admin access</span>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>

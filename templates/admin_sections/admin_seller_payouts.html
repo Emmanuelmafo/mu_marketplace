@@ -1,0 +1,97 @@
+<section class="section" id="admin-marketplace-orders">
+
+        <div class="section-heading">
+            <h2>Seller Payout Records</h2>
+            <p>Track pending payments and confirm completed seller payouts.</p>
+        </div>
+
+        <div class="notice">
+            Before marking a payout as paid, make sure you have actually
+            sent the money to the correct seller.
+        </div>
+
+        <div class="table-container">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Payout ID</th>
+                        <th>Seller</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for payout in payouts %}
+
+                    <tr>
+
+                        <td>#{{ payout.payout_id }}</td>
+
+                        <td>{{ payout.seller_name }}</td>
+
+                        <td>
+                            K{{ "%.2f"|format(payout.amount|float) }}
+                        </td>
+
+                        <td>
+                            {% if payout.status|lower == "pending" %}
+                                <span class="status pending">Pending</span>
+                            {% elif payout.status|lower == "paid" %}
+                                <span class="status paid">Paid</span>
+                            {% else %}
+                                <span class="status">
+                                    {{ payout.status }}
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+
+                            {% if payout.status|lower == "pending" %}
+
+                            <form class="mark-paid-form"
+                                  method="POST"
+                                  action="{{ url_for('admin_mark_payout_paid', payout_id=payout.payout_id) }}"
+                                  onsubmit="return confirm('Have you actually sent K{{ "%.2f"|format(payout.amount|float) }} to {{ payout.seller_name }}? Only confirm if the payment was successful.');">
+
+                                <button class="mark-paid-button"
+                                        type="submit">
+                                    Mark as Paid
+                                </button>
+
+                            </form>
+
+                            {% elif payout.status|lower == "paid" %}
+
+                                <span class="status paid">Payment Completed</span>
+
+                            {% else %}
+
+                                <span>—</span>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="5" class="empty">
+                            No seller payouts have been recorded yet.
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        </div>
+
+    </section>

@@ -1,0 +1,838 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="theme-color" content="#123c2c">
+    <meta name="description" content="Shop and sell conveniently through MU Marketplace.">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.webmanifest') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/pwa/icon-192.png') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/pwa/icon-192.png') }}">
+
+    <title>MU Marketplace</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+            color: #222;
+        }
+
+        header {
+            background: #123c2c;
+            color: white;
+            padding: 20px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        header h1 {
+            font-size: 25px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .hero {
+            background: #e4eee8;
+            text-align: center;
+            padding: 90px 20px;
+        }
+
+        .hero h2 {
+            font-size: 38px;
+            margin-bottom: 18px;
+            color: #123c2c;
+        }
+
+        .hero p {
+            font-size: 17px;
+            margin-bottom: 25px;
+        }
+
+        .search {
+            max-width: 550px;
+            margin: auto;
+            display: flex;
+            gap: 8px;
+        }
+
+        .search input {
+            flex: 1;
+            min-width: 0;
+            padding: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .search button {
+            padding: 14px 22px;
+            background: #123c2c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .categories {
+            padding: 50px 8%;
+            text-align: center;
+        }
+
+        .categories h2 {
+            margin-bottom: 30px;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .category {
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px #00000010;
+            overflow: hidden;
+            transition: transform .18s ease, box-shadow .18s ease;
+        }
+
+        .category:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 18px #00000018;
+        }
+
+        .category-image {
+            display: block;
+            width: 100%;
+            height: 125px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #e4eee8;
+        }
+
+        .category h3 {
+            margin-top: 11px;
+            font-size: 16px;
+        }
+
+        footer {
+            background: #123c2c;
+            color: white;
+            text-align: center;
+            padding: 25px;
+            margin-top: 40px;
+        }
+
+
+
+        .get-app-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 11px 16px;
+            border: 1px solid rgba(255,255,255,.45);
+            border-radius: 999px;
+            background: #ffffff;
+            color: #123c2c;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,.12);
+            transition: transform .18s ease, box-shadow .18s ease;
+        }
+        .get-app-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 18px rgba(0,0,0,.18);
+        }
+        .install-help {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(8,24,18,.62);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .install-help.open { display: flex; }
+        .install-help-card {
+            width: min(440px, 100%);
+            background: #fff;
+            color: #24352d;
+            border-radius: 18px;
+            padding: 25px;
+            box-shadow: 0 18px 55px rgba(0,0,0,.25);
+            line-height: 1.55;
+        }
+        .install-help-card h3 { color: #123c2c; margin-bottom: 10px; }
+        .install-help-card p { margin: 9px 0; }
+        .install-help-card button {
+            margin-top: 14px;
+            padding: 10px 18px;
+            border: 0;
+            border-radius: 9px;
+            background: #123c2c;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        @media (max-width: 640px) {
+            .get-app-button { padding: 9px 12px; font-size: 13px; }
+            header { align-items: flex-start; }
+        }
+
+        .home-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .home-icon-link {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: white;
+            color: #123c2c;
+            text-decoration: none;
+            font-size: 22px;
+            border: 0;
+            cursor: pointer;
+        }
+
+        .home-icon-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            min-width: 19px;
+            height: 19px;
+            padding: 0 5px;
+            border-radius: 20px;
+            background: #e63946;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+        }
+
+        .home-notify-wrap { position: relative; }
+        .home-notification-panel {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            width: min(360px, calc(100vw - 35px));
+            max-height: 420px;
+            overflow: auto;
+            background: white;
+            border: 1px solid #e8e2f5;
+            border-radius: 12px;
+            box-shadow: 0 12px 35px rgba(0,0,0,.18);
+            z-index: 100;
+            padding: 14px;
+            color: #222;
+            text-align: left;
+        }
+        .home-notification-panel.open { display: block; }
+        .home-notification-panel h3 { margin: 2px 0 12px; color: #123c2c; }
+        .home-notification-entry { padding: 11px 2px; border-bottom: 1px solid #eee; }
+        .home-notification-entry:last-child { border-bottom: 0; }
+        .home-notification-entry p { margin: 6px 0; color: #555; line-height: 1.5; font-size: 13px; white-space: pre-line; }
+        .home-notification-entry small { color: #888; font-size: 11px; }
+
+        .category-filter {
+            width: 100%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            font: inherit;
+            color: inherit;
+            text-align: center;
+        }
+        .category-filter:hover {
+            border-color: #123c2c;
+            transform: translateY(-2px);
+        }
+        .category-filter.active {
+            border-color: #123c2c;
+            background: #e4eee8;
+        }
+        .category-filter:focus-visible {
+            outline: 3px solid #77a58b;
+            outline-offset: 3px;
+        }
+
+        .home-products-section {
+            padding: 45px 8%;
+            background: #f5f7fa;
+        }
+        .home-products-section > h2 {
+            color: #123c2c;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .home-products-intro {
+            text-align: center;
+            color: #666;
+            margin-bottom: 32px;
+        }
+        .home-category-block { margin: 30px 0 38px; }
+        .home-category-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            border-bottom: 2px solid #dce8e0;
+            padding-bottom: 10px;
+        }
+        .home-category-heading h3 { color: #123c2c; font-size: 21px; }
+        .home-category-heading a { color: #123c2c; font-weight: bold; text-decoration: none; }
+        .home-product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(205px, 1fr));
+            gap: 18px;
+        }
+        .home-product-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 9px #00000010;
+            border: 1px solid #e8eee9;
+        }
+        .home-product-card img {
+            width: 100%;
+            height: 165px;
+            object-fit: cover;
+            background: #e4eee8;
+            display: block;
+        }
+        .home-product-no-image {
+            height: 165px;
+            display: grid;
+            place-items: center;
+            background: #e4eee8;
+            color: #668071;
+        }
+        .home-product-info { padding: 14px; }
+        .home-product-info h4 { color: #222; margin-bottom: 8px; }
+        .home-product-price { color: #123c2c; font-size: 19px; font-weight: bold; margin: 9px 0 5px; }
+        .home-product-stock { color: #666; font-size: 13px; margin-bottom: 13px; }
+        .home-product-view {
+            display: inline-block;
+            background: #123c2c;
+            color: white;
+            text-decoration: none;
+            padding: 9px 13px;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .home-no-products {
+            max-width: 700px;
+            margin: 25px auto;
+            background: white;
+            border-radius: 9px;
+            padding: 25px;
+            text-align: center;
+            color: #666;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+            }
+
+            nav a {
+                margin: 0 7px;
+            }
+
+            .hero h2 {
+                font-size: 29px;
+            }
+        }
+    
+/* MU Marketplace branded order journey */
+.order-tracking-section{margin-top:34px}.order-tracking-section>h2{color:#123c2c!important;font-size:25px;margin-bottom:7px!important}
+.tracking-intro{color:#64736b;margin:0 0 18px;font-size:14px}
+.tracking-card{background:linear-gradient(145deg,#fff,#f7fbf8);border:1px solid #dce9e0;border-radius:18px;padding:20px;margin:0 0 17px;box-shadow:0 8px 24px rgba(18,60,44,.07)}
+.tracking-card-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.tracking-card-head h3{color:#123c2c;font-size:18px}
+.tracking-meta{color:#68766e;font-size:13px;margin:7px 0 15px}.tracking-items{background:#f0f6f1;border-radius:12px;padding:12px 14px;margin:12px 0 17px;color:#31463a;line-height:1.7}
+.tracking-pill{display:inline-flex;border-radius:30px;padding:7px 12px;background:#e4eee8;color:#123c2c;font-size:12px;font-weight:700;text-transform:capitalize}
+.tracking-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:16px 0 13px}.tracking-step{text-align:center;min-width:0}
+.tracking-step .step-dot{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;margin:0 auto 8px;background:#e6eae7;color:#728078;font-weight:800;border:2px solid #d8e0da}
+.tracking-step.done .step-dot{background:#123c2c;color:white;border-color:#123c2c}.tracking-step.current .step-dot{background:#fff4d8;color:#8b5b00;border:2px solid #d8a83e}
+.tracking-step .step-label{color:#69766e;font-size:11px;line-height:1.35;display:block}.tracking-step.done .step-label,.tracking-step.current .step-label{color:#123c2c;font-weight:700}
+.tracking-status-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:16px}
+.tracking-status-box{background:#f4f7f4;border-radius:11px;padding:11px}.tracking-status-box small{display:block;color:#718078;font-size:11px;margin-bottom:5px}
+.tracking-status-box strong{color:#203d2d;font-size:13px;text-transform:capitalize;overflow-wrap:anywhere}
+.tracking-note{color:#69766e;font-size:12px;line-height:1.5;margin-top:14px}.tracking-empty{background:white;border:1px dashed #c9d9ce;padding:22px;border-radius:14px;color:#64736b}
+.brand-lockup{display:flex;align-items:center;gap:10px;min-width:0}.brand-lockup img{width:54px;height:54px;object-fit:contain;flex:0 0 auto}.brand-lockup h2{margin:0}
+.admin-tracking-form{background:#f5f9f6;border:1px solid #dce9e0;border-radius:13px;padding:13px}
+.admin-tracking-form .tracking-control-group{background:white;border:1px solid #e1ebe4;border-radius:10px;padding:11px;margin-bottom:10px}
+.admin-tracking-form .tracking-control-group strong{display:block;color:#123c2c;margin-bottom:7px}
+.admin-tracking-form label{display:flex!important;align-items:center;gap:8px;line-height:1.5;color:#3e5145;cursor:pointer}
+.admin-tracking-form input[type=checkbox],.admin-tracking-form input[type=radio]{accent-color:#176b45;width:16px;height:16px;flex:0 0 auto}
+.admin-tracking-form button{width:100%;border:0;border-radius:9px;padding:11px 13px;background:#123c2c;color:white;font-weight:700;cursor:pointer}
+@media(max-width:560px){.tracking-card{padding:15px}.tracking-steps{gap:3px}.tracking-step .step-label{font-size:10px}.tracking-status-grid{grid-template-columns:1fr}.tracking-card-head h3{font-size:16px}.brand-lockup img{width:43px;height:43px}}
+
+</style>
+</head>
+
+<body>
+
+    <header class="marketplace-sticky-header">
+        <div class="brand-lockup">
+            <img src="{{ url_for('static', filename='images/branding/mu-marketplace-logo.png') }}" alt="MU Marketplace logo">
+            <h1>MU Marketplace</h1>
+        </div>
+
+        <a href="{{ url_for('buy_from_abroad') }}" class="buy-from-abroad-button" style="display:inline-flex;align-items:center;justify-content:center;padding:9px 14px;margin:8px;background:#14532d;color:#fff;border-radius:8px;text-decoration:none;font-weight:700;">Buy from Abroad</a>
+
+        <div class="home-header-actions">
+            <button class="header-search-toggle" id="headerSearchToggle" type="button"
+                    aria-label="Open product search" aria-expanded="false" title="Search products">
+                <img src="{{ url_for('static', filename='images/branding/search-icon.png') }}" alt="">
+            </button>
+            <form class="header-quick-search" id="headerQuickSearch" action="{{ url_for('home') }}" method="get" role="search">
+                <input type="search" name="q" placeholder="Search products..." aria-label="Search products">
+                <button type="submit" aria-label="Submit search">Search</button>
+            </form>
+
+            <button class="get-app-button" id="getAppButton" type="button">
+                <span aria-hidden="true">📲</span> Get the App
+            </button>
+            <nav>
+                <a href="#categories">Categories</a>
+                <a href="#about">About</a>
+                {% if session.get("user_id") and session.get("user_role") in ["buyer", "seller"] %}
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}">Login</a>
+                    <a href="{{ url_for('register') }}">Register</a>
+                {% endif %}
+            </nav>
+
+            {% if session.get("user_id") and session.get("user_role") == "buyer" %}
+                <a class="home-icon-link" href="{{ url_for('buyer_cart') }}" title="Shopping cart" aria-label="Shopping cart">
+                    <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h2l2.1 11.1a2 2 0 0 0 2 1.6h8.8a2 2 0 0 0 1.9-1.4L22 8H6"/><circle cx="10" cy="19.5" r="1.4"/><circle cx="18" cy="19.5" r="1.4"/></svg>
+                    {% if cart_count %}<span class="home-icon-count">{{ cart_count }}</span>{% endif %}
+                </a>
+                <div class="home-notify-wrap">
+                    <button class="home-icon-link" id="homeNotificationBell" type="button" title="Notifications" aria-label="Notifications">
+                        <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+                        {% if unread_count %}<span class="home-icon-count" id="homeNotificationCount">{{ unread_count }}</span>{% endif %}
+                    </button>
+                    <div class="home-notification-panel" id="homeNotificationPanel">
+                        <h3>Notifications</h3>
+                        {% for notification in notifications %}
+                            <article class="home-notification-entry">
+                                <strong>{{ notification.title }}</strong>
+                                <p>{{ notification.message }}</p>
+                                <small>{{ notification.created_at }}</small>
+                            </article>
+                        {% else %}<p>No notifications yet.</p>{% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </header>
+
+    <section class="hero">
+        <h2>Welcome to MU Marketplace</h2>
+
+        <p>
+            Buy and sell products conveniently
+            through one marketplace.
+        </p>
+
+        <form class="search home-filter-search" action="{{ url_for('home') }}" method="get" role="search">
+            <div class="home-search-main">
+                <input type="search" name="q" value="{{ search or '' }}"
+                       placeholder="Search products..." aria-label="Search for products">
+                <button type="submit" class="home-search-submit" aria-label="Search">
+                    <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
+                </button>
+            </div>
+            <div class="home-filter-row">
+                <select name="category" aria-label="Filter by category">
+                    <option value="">All categories</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}" {% if selected_category|string == category.id|string %}selected{% endif %}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="number" name="min_price" min="0" step="0.01" value="{{ min_price or '' }}" placeholder="Min price" aria-label="Minimum price">
+                <input type="number" name="max_price" min="0" step="0.01" value="{{ max_price or '' }}" placeholder="Max price" aria-label="Maximum price">
+                <select name="sort" aria-label="Sort products">
+                    <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Newest</option>
+                    <option value="price_low" {% if selected_sort == 'price_low' %}selected{% endif %}>Price: low to high</option>
+                    <option value="price_high" {% if selected_sort == 'price_high' %}selected{% endif %}>Price: high to low</option>
+                </select>
+                <button type="submit" class="home-filter-submit">Apply filters</button>
+                <a class="home-filter-clear" href="{{ url_for('home') }}">Clear</a>
+            </div>
+        </form>
+    </section>
+
+    <section class="categories" id="categories">
+        <h2>Explore Categories</h2>
+        <p style="color:#666;margin:-15px 0 25px;">Choose a category to see all available items listed under it.</p>
+
+        <div class="category-grid">
+            <button type="button" class="category category-filter active" data-category="all">
+                <img class="category-image" src="{{ url_for('static', filename='images/categories/all.webp') }}" alt="A selection of marketplace products" loading="lazy">
+                <h3>All Categories</h3>
+            </button>
+            {% for category_name, category_products in home_products|groupby('category_name') %}
+                {% set display_category = category_name or 'Other Products' %}
+                {% set category_key = display_category|lower %}
+                {% set category_image = 'all.webp' %}
+                {% if 'beauty' in category_key or 'cosmetic' in category_key or 'skin' in category_key %}
+                    {% set category_image = 'beauty.webp' %}
+                {% elif 'fashion' in category_key or 'cloth' in category_key or 'shoe' in category_key or 'wear' in category_key %}
+                    {% set category_image = 'fashion.webp' %}
+                {% elif 'electronic' in category_key or 'phone' in category_key or 'computer' in category_key or 'tech' in category_key %}
+                    {% set category_image = 'electronics.webp' %}
+                {% elif 'book' in category_key or 'stationery' in category_key or 'education' in category_key %}
+                    {% set category_image = 'books.webp' %}
+                {% elif 'home' in category_key or 'furniture' in category_key or 'decor' in category_key %}
+                    {% set category_image = 'home.webp' %}
+                {% elif 'sport' in category_key or 'fitness' in category_key or 'gym' in category_key %}
+                    {% set category_image = 'sports.webp' %}
+                {% elif 'grocery' in category_key or 'food' in category_key or 'drink' in category_key %}
+                    {% set category_image = 'groceries.webp' %}
+                {% elif 'accessor' in category_key or 'jewel' in category_key or 'watch' in category_key %}
+                    {% set category_image = 'accessories.webp' %}
+                {% endif %}
+                <button type="button" class="category category-filter" data-category="{{ display_category }}">
+                    <img class="category-image" src="{{ url_for('static', filename='images/categories/' ~ category_image) }}" alt="{{ display_category }} category photo" loading="lazy">
+                    <h3>{{ display_category }}</h3>
+                </button>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="home-products-section" id="available-products">
+        <h2>Available Products</h2>
+        <p class="home-products-intro">
+            Explore products currently available on MU Marketplace.
+            You can browse without logging in.
+        </p>
+
+        {% if home_products %}
+            {% for category_name, category_products in home_products|groupby('category_name') %}
+                <div class="home-category-block" data-product-category="{{ category_name or 'Other Products' }}">
+                    <div class="home-category-heading">
+                        <h3>{{ category_name or 'Other Products' }}</h3>
+                    </div>
+
+                    <div class="home-product-grid">
+                        {% for product in category_products %}
+                            <article class="home-product-card">
+                                {% if product.image %}
+                                    <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.name }}">
+                                {% else %}
+                                    <div class="home-product-no-image">No image available</div>
+                                {% endif %}
+                                <div class="home-product-info">
+                                    <h4>{{ product.name }}</h4>
+                                    <p class="home-product-price">K{{ '%.2f'|format(product.price|float) }}</p>
+                                    <p class="home-product-stock">{{ product.stock }} available</p>
+                                    <a class="home-product-view" href="{{ url_for('product_page', product_id=product.id) }}">View Product</a>
+                                    {% if session.get("user_id") and session.get("user_role") == "buyer" %}
+                                        {% if product.id in watchlist_ids %}
+                                            <form method="POST" action="{{ url_for('watchlist_remove', product_id=product.id) }}" style="display:inline-block;margin-top:8px;">
+                                                <button type="submit" class="home-product-view" style="background:#eeeaf8;color:#123c2c;border:0;cursor:pointer;">♥ Saved</button>
+                                            </form>
+                                        {% else %}
+                                            <form method="POST" action="{{ url_for('watchlist_add', product_id=product.id) }}" style="display:inline-block;margin-top:8px;">
+                                                <button type="submit" class="home-product-view" style="border:0;cursor:pointer;">♡ Watchlist</button>
+                                            </form>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="home-no-products">
+                <h3>No products available yet</h3>
+                <p>Products will appear here when sellers list items that are available for purchase.</p>
+            </div>
+        {% endif %}
+    </section>
+
+    <section class="categories" id="sell-on-mu" style="background:#e4eee8;margin-top:25px;">
+        <h2>Want to Sell on MU Marketplace?</h2>
+        <p style="color:#555;margin-bottom:20px;">Create or log in to a seller account to list your products. Selling is available to registered sellers only.</p>
+        {% if session.get("user_id") and session.get("user_role") == "seller" %}
+            <a class="home-product-view" href="{{ url_for('add_product_page') }}">List a Product</a>
+        {% elif not session.get("user_id") %}
+            <a class="home-product-view" href="{{ url_for('login') }}">Seller Login</a>
+            <a class="home-product-view" href="{{ url_for('register') }}" style="margin-left:8px;">Create Account</a>
+        {% else %}
+            <a class="home-product-view" href="{{ url_for('switch_account') }}">Manage Account</a>
+        {% endif %}
+    </section>
+
+    <section class="categories" id="about">
+        <h2>About MU Marketplace</h2>
+
+        <p>
+            MU Marketplace is a platform designed to
+            connect buyers and sellers, making it easier
+            to discover and trade products and services.
+        </p>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 MU Marketplace. All rights reserved.</p>
+    </footer>
+
+
+
+{% if session.get("user_id") and session.get("user_role") == "buyer" %}
+<script>
+(function () {
+    const bell = document.getElementById("homeNotificationBell");
+    const panel = document.getElementById("homeNotificationPanel");
+    if (!bell || !panel) return;
+
+    bell.addEventListener("click", async function () {
+        const opening = !panel.classList.contains("open");
+        panel.classList.toggle("open");
+
+        if (opening) {
+            try {
+                await fetch("{{ url_for('notifications_read') }}", {
+                    method: "POST",
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                });
+                const count = document.getElementById("homeNotificationCount");
+                if (count) count.remove();
+            } catch (error) {
+                console.warn("Could not mark notifications as read.", error);
+            }
+        }
+    });
+
+    document.addEventListener("click", function (event) {
+        if (!event.target.closest(".home-notify-wrap")) {
+            panel.classList.remove("open");
+        }
+    });
+})();
+</script>
+{% endif %}
+
+
+
+<script>
+(function () {
+    const categoryButtons = document.querySelectorAll(".category-filter");
+    const categorySections = document.querySelectorAll(".home-category-block");
+    if (!categoryButtons.length || !categorySections.length) return;
+
+    categoryButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+            const selectedCategory = button.dataset.category;
+
+            categoryButtons.forEach(function (item) {
+                item.classList.toggle("active", item === button);
+                item.setAttribute("aria-pressed", item === button ? "true" : "false");
+            });
+
+            categorySections.forEach(function (section) {
+                const matches = selectedCategory === "all" ||
+                    section.dataset.productCategory === selectedCategory;
+                section.hidden = !matches;
+            });
+
+            document.getElementById("available-products").scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        });
+        button.setAttribute("aria-pressed", button.classList.contains("active") ? "true" : "false");
+    });
+})();
+</script>
+
+
+
+<style>
+.mu-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:200;background:#fff;border-top:1px solid #e8e8ee;display:flex;justify-content:center;align-items:center;gap:46px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -2px 8px rgba(20,25,45,.04);}
+.mu-bottom-nav a{min-width:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-decoration:none;color:#55566b;font-size:13px;font-weight:500;padding:5px 14px;border-radius:8px;transition:color .18s ease,transform .18s ease;}
+.mu-bottom-nav a .nav-icon{font-size:27px;line-height:1;color:#777b91}
+.mu-bottom-nav a.active{background:transparent;color:#25223a}
+.mu-bottom-nav a.active .nav-icon{color:#1766d2}
+.mu-bottom-nav a:hover{color:#1766d2;transform:translateY(-1px)}
+@media(max-width:480px){.mu-bottom-nav{gap:22px}.mu-bottom-nav a{min-width:100px}}
+body{padding-bottom:85px}
+
+/* Consistent MU Marketplace button and icon system */
+:root{--mu-green:#123c2c;--mu-green-2:#1b5b40;--mu-gold:#c69a3a;--mu-border:#dce8df;--mu-shadow:0 5px 16px rgba(18,60,44,.12)}
+.ui-icon{width:21px;height:21px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.icon-link,.home-icon-link{width:46px;height:46px;border-radius:14px!important;background:#fff!important;color:var(--mu-green)!important;border:1px solid var(--mu-border)!important;box-shadow:0 3px 10px rgba(18,60,44,.08);transition:transform .18s,box-shadow .18s,border-color .18s}
+.icon-link:hover,.home-icon-link:hover{transform:translateY(-2px);border-color:#c69a3a!important;box-shadow:var(--mu-shadow)}
+.notify-count,.cart-count,.home-icon-count{background:#c43d43!important;box-shadow:0 2px 5px #0002}
+button,.btn,.button,.card a,.logout,.switch-account,.mark-paid-button,.payout-form button,.admin-tracking-form button,.get-app-button,.dashboard-search button{font-family:inherit;font-weight:700;letter-spacing:.01em;transition:transform .18s ease,box-shadow .18s ease,background .18s ease,border-color .18s ease}
+.container button,.container a.card-action,.card a,.logout,.switch-account,.mark-paid-button,.payout-form button,.admin-tracking-form button,.dashboard-search button{border-radius:11px!important;box-shadow:0 3px 9px rgba(18,60,44,.12);min-height:40px}
+.card a,.mark-paid-button,.payout-form button,.admin-tracking-form button,.dashboard-search button{background:linear-gradient(135deg,#123c2c,#1d6546)!important;color:#fff!important;border:1px solid #123c2c!important;padding:11px 17px!important;text-decoration:none!important}
+.logout{background:linear-gradient(135deg,#a83c3c,#c84d4d)!important;color:#fff!important;border:1px solid #a83c3c!important;padding:10px 17px!important;text-decoration:none!important}
+.switch-account{background:#fff!important;color:#123c2c!important;border:1px solid #cbdccf!important;padding:10px 16px!important;text-decoration:none!important}
+button:hover,.card a:hover,.logout:hover,.switch-account:hover,.mark-paid-button:hover,.payout-form button:hover,.admin-tracking-form button:hover,.dashboard-search button:hover,.get-app-button:hover{transform:translateY(-2px);box-shadow:0 7px 17px rgba(18,60,44,.18)!important}
+button:active,.card a:active,.logout:active,.switch-account:active{transform:translateY(0) scale(.98)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid rgba(198,154,58,.45)!important;outline-offset:2px}
+.dashboard-search{border-radius:18px!important;border:1px solid #d5e3d9!important;box-shadow:0 8px 24px rgba(18,60,44,.09)!important}
+.dashboard-search button{min-width:105px}
+.notification-panel{border:1px solid #dce8df!important;border-radius:16px!important;box-shadow:0 16px 40px rgba(18,60,44,.18)!important}
+.notification-panel h3{color:#123c2c!important}
+@media(max-width:520px){.icon-link,.home-icon-link{width:42px;height:42px}.container button,.card a,.logout,.switch-account{min-height:38px}}
+
+
+/* Fixed marketplace header keeps core actions available while browsing */
+.marketplace-sticky-header{position:sticky;top:0;z-index:1200;isolation:isolate;background:#123c2c;box-shadow:0 5px 18px rgba(0,0,0,.16);backdrop-filter:saturate(130%)}
+.marketplace-sticky-header .home-header-actions{gap:10px}
+.marketplace-sticky-header nav{display:flex;align-items:center;gap:16px}
+.marketplace-sticky-header nav a{margin:0;white-space:nowrap}
+.header-search-toggle{width:44px;height:44px;flex:0 0 44px;border:1px solid rgba(255,255,255,.28);border-radius:13px;background:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.12)}
+.header-search-toggle img{width:27px;height:27px;object-fit:contain}
+.header-quick-search{display:none;align-items:center;gap:7px;background:#fff;border:1px solid #dce8df;border-radius:14px;padding:5px;box-shadow:0 5px 16px rgba(0,0,0,.15)}
+.header-quick-search.open{display:flex;animation:quickSearchIn .18s ease}
+.header-quick-search input{width:clamp(150px,20vw,250px);min-width:0;border:0!important;outline:0!important;padding:9px 10px!important;font-size:14px;background:transparent!important;box-shadow:none!important}
+.header-quick-search button{border:0;border-radius:10px;background:#123c2c;color:#fff;padding:9px 13px;font-weight:700;cursor:pointer}
+@keyframes quickSearchIn{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}
+@media(max-width:900px){.marketplace-sticky-header{padding:12px 4%!important}.marketplace-sticky-header .home-header-actions{gap:8px}.marketplace-sticky-header nav{gap:10px}.marketplace-sticky-header nav a{font-size:13px}}
+@media(max-width:650px){.marketplace-sticky-header{align-items:center!important;gap:10px!important}.marketplace-sticky-header .brand-lockup h1{font-size:17px}.marketplace-sticky-header .brand-lockup img{width:42px;height:42px}.marketplace-sticky-header .home-header-actions{width:auto;flex:1;justify-content:flex-end}.marketplace-sticky-header nav{display:none}.marketplace-sticky-header .get-app-button{display:none}.header-search-toggle{width:40px;height:40px;flex-basis:40px}.header-quick-search{position:absolute;top:calc(100% + 7px);right:12px;left:12px;z-index:1201;box-shadow:0 12px 30px rgba(0,0,0,.2)}.header-quick-search input{width:auto;flex:1}.marketplace-sticky-header .home-icon-link{width:40px;height:40px}}
+
+
+/* Compact rounded homepage search and catalogue filters */
+.home-filter-search{width:min(760px,94%);margin:24px auto 0;display:block;padding:0;background:transparent;gap:0}
+.home-search-main{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #d6e3da;border-radius:999px;padding:5px 7px 5px 18px;box-shadow:0 7px 20px rgba(18,60,44,.09);transition:box-shadow .2s,border-color .2s}
+.home-search-main:focus-within{border-color:#c69a3a;box-shadow:0 0 0 4px rgba(198,154,58,.12),0 8px 22px rgba(18,60,44,.1)}
+.home-search-main input{flex:1;min-width:0;border:0!important;outline:0!important;background:transparent!important;box-shadow:none!important;padding:10px 4px!important;font-size:15px}
+.home-search-submit{width:42px;height:42px;flex:0 0 42px;border:0;border-radius:50%;display:grid;place-items:center;background:#123c2c;color:white;cursor:pointer}
+.home-search-submit .ui-icon{width:19px;height:19px;stroke:currentColor}
+.home-filter-row{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;margin:12px auto 0}
+.home-filter-row input,.home-filter-row select{min-width:115px;max-width:180px;border:1px solid #dce8df!important;border-radius:12px!important;background:#fff;padding:9px 11px!important;color:#30463a;font-size:13px;box-shadow:0 2px 7px rgba(18,60,44,.04)}
+.home-filter-submit{border:0;border-radius:12px;background:#123c2c;color:white;padding:10px 15px;font-weight:700;cursor:pointer}
+.home-filter-clear{color:#123c2c;font-size:13px;font-weight:700;text-decoration:none;padding:9px}
+.header-quick-search{border-radius:999px}
+.header-quick-search input{border-radius:999px!important}
+@media(max-width:600px){.home-filter-search{width:100%;margin-top:18px}.home-filter-row{display:grid;grid-template-columns:1fr 1fr}.home-filter-row input,.home-filter-row select{max-width:none;min-width:0;width:100%}.home-filter-submit{grid-column:1/-1}.home-search-main input{font-size:14px}}
+
+</style>
+<nav class="mu-bottom-nav" aria-label="Main navigation">
+    <a href="{% if session.get('user_id') and session.get('user_role') == 'seller' %}{{ url_for('home') }}{% else %}{{ url_for('home') }}{% endif %}" class="active"><span class="nav-icon">⌂</span><span>Home</span></a>
+    <a href="{% if session.get('user_id') and session.get('user_role') == 'buyer' %}{{ url_for('buyer_dashboard') }}{% elif session.get('user_id') and session.get('user_role') == 'seller' %}{{ url_for('seller_dashboard') }}{% else %}{{ url_for('login') }}{% endif %}">
+        <span class="nav-icon">◉</span><span>My Dashboard</span>
+    </a>
+</nav>
+
+
+<div class="install-help" id="installHelp" role="dialog" aria-modal="true" aria-labelledby="installHelpTitle">
+    <div class="install-help-card">
+        <h3 id="installHelpTitle">Install MU Marketplace</h3>
+        <p id="installHelpMessage">Add MU Marketplace to your device for quick access, just like an app.</p>
+        <p><strong>Android (Chrome):</strong> Open the browser menu (⋮), then choose <em>Install app</em> or <em>Add to Home screen</em>.</p>
+        <p><strong>iPhone/iPad (Safari):</strong> Tap Share, then choose <em>Add to Home Screen</em>.</p>
+        <p><strong>Computer (Chrome/Edge):</strong> Use the install icon in the address bar, or choose <em>Install MU Marketplace</em> from the browser menu.</p>
+        <button type="button" id="closeInstallHelp">Got it</button>
+    </div>
+</div>
+<script>
+(function () {
+    let deferredInstallPrompt = null;
+    const installButton = document.getElementById("getAppButton");
+    const help = document.getElementById("installHelp");
+    const closeHelp = document.getElementById("closeInstallHelp");
+
+    window.addEventListener("beforeinstallprompt", function (event) {
+        event.preventDefault();
+        deferredInstallPrompt = event;
+    });
+
+    if (installButton) {
+        installButton.addEventListener("click", async function () {
+            if (deferredInstallPrompt) {
+                deferredInstallPrompt.prompt();
+                await deferredInstallPrompt.userChoice;
+                deferredInstallPrompt = null;
+                return;
+            }
+            if (help) help.classList.add("open");
+        });
+    }
+    if (closeHelp && help) {
+        closeHelp.addEventListener("click", function () { help.classList.remove("open"); });
+        help.addEventListener("click", function (event) {
+            if (event.target === help) help.classList.remove("open");
+        });
+    }
+
+    if ("serviceWorker" in navigator && window.location.protocol !== "file:") {
+        window.addEventListener("load", function () {
+            navigator.serviceWorker.register("/service-worker.js").catch(function (error) {
+                console.warn("MU Marketplace app setup could not be completed:", error);
+            });
+        });
+    }
+})();
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const toggle = document.getElementById('headerSearchToggle');
+  const form = document.getElementById('headerQuickSearch');
+  if (!toggle || !form) return;
+  const field = form.querySelector('input[name="q"]');
+  toggle.addEventListener('click', function () {
+    const open = form.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open && field) field.focus();
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && form.classList.contains('open')) {
+      form.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.focus();
+    }
+  });
+  document.addEventListener('click', function (event) {
+    if (!form.contains(event.target) && !toggle.contains(event.target)) {
+      form.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+});
+</script>
+<script src="{{ url_for('static', filename='js/pull-to-refresh.js') }}" defer></script>
+</body>
+</html>

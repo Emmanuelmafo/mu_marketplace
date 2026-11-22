@@ -1,0 +1,54 @@
+<section class="section" id="admin-seller-finances">
+
+        <div class="section-heading">
+            <h2>Financial Overview</h2>
+            <p>Monitor payments, commissions and seller payouts.</p>
+        </div>
+
+        <div class="stats-grid">
+
+            <div class="stat-card highlight">
+                <h3>Completed Payments</h3>
+                <div class="number">
+                    K{{ "%.2f"|format(summary.completed_payments|float) }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Total Commissions</h3>
+                <div class="number">
+                    K{{ "%.2f"|format(summary.total_commissions|float) }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Pending Commissions</h3>
+                <div class="number">
+                    K{{ "%.2f"|format(summary.pending_commissions|float) }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Paid Commissions</h3>
+                <div class="number">
+                    K{{ "%.2f"|format(summary.paid_commissions|float) }}
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Completed Payouts</h3>
+                <div class="number">
+                    K{{ "%.2f"|format(summary.completed_payouts|float) }}
+                </div>
+            </div>
+
+            <div class="stat-card finance-card">
+                <h3>Pending Payouts</h3>
+                <div class="number">
+                    K{{ "%.2f"|format(summary.pending_payouts|float) }}
+                </div>
+            </div>
+
+        </div>
+
+    </section>

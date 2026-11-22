@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Watchlist | MU Marketplace</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f5f8;color:#24213a;font-family:Arial,sans-serif}
+header{background:white;padding:18px 6%;border-bottom:1px solid #eee}header a{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:10px 17px;border:1px solid #d9d3ef;border-radius:9px;background:#f7f5ff;color:#2e05c2;text-decoration:none;font-weight:700;transition:background .2s,border-color .2s,transform .2s}header a:hover{background:#eee9ff;border-color:#b9ade8;transform:translateY(-1px)}
+main{max-width:1100px;margin:30px auto;padding:0 5%}h1{color:#24105f;margin-bottom:8px}.intro{color:#77738a;margin-bottom:22px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
+.card{background:white;border-radius:12px;padding:14px;border:1px solid #eeeaf8}
+.card img,.no-image{width:100%;height:170px;object-fit:contain;background:#f4f1fb;border-radius:8px}
+.no-image{display:flex;align-items:center;justify-content:center;color:#888}
+.card h3{margin:12px 0 7px;font-size:17px}.price{font-weight:bold;color:#2e05c2;font-size:18px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.actions a,.actions button{border:0;border-radius:7px;padding:9px 12px;text-decoration:none;background:#2e05c2;color:white;cursor:pointer;font-size:13px}
+.actions button{background:#eeeaf8;color:#2e05c2}
+.empty{background:white;border-radius:12px;padding:35px;text-align:center;color:#777}.empty a{display:inline-flex;align-items:center;justify-content:center;min-height:46px;margin-top:8px;padding:11px 22px;border-radius:9px;background:#2e05c2;color:white;text-decoration:none;font-weight:700;box-shadow:0 3px 8px rgba(46,5,194,.18);transition:background .2s,transform .2s,box-shadow .2s}.empty a:hover{background:#210391;transform:translateY(-2px);box-shadow:0 5px 12px rgba(46,5,194,.24)}
+</style></head><body>
+<header><a href="{{ url_for('buyer_dashboard') }}">← Back to My Dashboard</a></header>
+<main><h1>♡ Watchlist</h1><p class="intro">Keep tabs on products you want to check again later.</p>
+{% if products %}
+<div class="grid">
+{% for product in products %}
+<article class="card">
+{% if product.image %}<img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.name }}">{% else %}<div class="no-image">No image available</div>{% endif %}
+<h3>{{ product.name }}</h3><p class="price">K{{ '%.2f'|format(product.price|float) }}</p>
+<p class="intro">{{ product.stock }} available</p>
+<div class="actions">
+<a href="{{ url_for('product_page', product_id=product.id) }}">View Product</a>
+<form method="POST" action="{{ url_for('watchlist_remove', product_id=product.id) }}"><button type="submit">Remove ♡</button></form>
+</div></article>
+{% endfor %}
+</div>
+{% else %}
+<div class="empty"><h2>Your Watchlist is empty</h2><p>Save products you're interested in and they'll appear here.</p><a href="{{ url_for('home') }}">Go to Home</a></div>
+{% endif %}
+</main><script src="{{ url_for('static', filename='js/pull-to-refresh.js') }}" defer></script>
+</body></html>

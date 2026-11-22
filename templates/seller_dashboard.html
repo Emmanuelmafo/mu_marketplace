@@ -1,0 +1,726 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Seller Dashboard | MU Marketplace</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f5fb;
+            color: #25223a;
+            padding-bottom: 85px;
+        }
+
+        /* Match the Home / My Dashboard navigation used on the buyer dashboard. */
+        .mu-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:200;background:#fff;border-top:1px solid #e8e8ee;display:flex;justify-content:center;align-items:center;gap:46px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -2px 8px rgba(20,25,45,.04);}
+        .mu-bottom-nav a{min-width:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-decoration:none;color:#55566b;font-size:13px;font-weight:500;padding:5px 14px;border-radius:8px;transition:color .18s ease,transform .18s ease;}
+        .mu-bottom-nav a .nav-icon{font-size:27px;line-height:1;color:#777b91}
+        .mu-bottom-nav a.active{background:transparent;color:#25223a}
+        .mu-bottom-nav a.active .nav-icon{color:#1766d2}
+        .mu-bottom-nav a:hover{color:#1766d2;transform:translateY(-1px)}
+        @media(max-width:480px){.mu-bottom-nav{gap:22px}.mu-bottom-nav a{min-width:100px}}
+
+        header {
+            background: #ffffff;
+            color: #2e05c2;
+            padding: 20px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eeeaf8;
+            box-shadow: 0 2px 10px rgba(35, 20, 90, 0.04);
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 35px 7%;
+        }
+
+        .welcome {
+            margin-bottom: 25px;
+        }
+
+        .welcome h1 {
+            margin-bottom: 8px;
+            color: #24105f;
+        }
+
+        .welcome p {
+            color: #77738a;
+            line-height: 1.5;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            align-items: stretch;
+        }
+
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            border: 1px solid #eeeaf8;
+            box-shadow: 0 4px 15px rgba(35, 20, 90, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 175px;
+            transition: 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(35, 20, 90, 0.09);
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+            color: #24105f;
+        }
+
+        .card p {
+            color: #77738a;
+            line-height: 1.5;
+            margin-bottom: 18px;
+        }
+
+        .card a {
+            display: inline-block;
+            background: #2e05c2;
+            color: white;
+            padding: 10px 18px;
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+            transition: 0.2s;
+        }
+
+        .card a:hover {
+            background: #21038f;
+        }
+
+        .logout {
+            background: #2e05c2;
+            padding: 10px 16px;
+            border-radius: 8px;
+        }
+
+        .logout:hover {
+            background: #21038f;
+        }
+
+        .switch-account {
+            background: #f0edff;
+            color: #2e05c2 !important;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            border: 1px solid #dcd4ff;
+        }
+
+        .switch-account:hover {
+            background: #dcd4ff;
+        }
+
+        /* Financial summary */
+        .finance-section {
+            margin-bottom: 30px;
+        }
+
+        .finance-heading {
+            margin-bottom: 18px;
+        }
+
+        .finance-heading h2 {
+            color: #24105f;
+            margin-bottom: 7px;
+        }
+
+        .finance-heading p {
+            color: #77738a;
+            line-height: 1.5;
+        }
+
+        .finance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 16px;
+        }
+
+        .finance-card {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #eeeaf8;
+            box-shadow: 0 4px 15px rgba(35, 20, 90, 0.05);
+        }
+
+        .finance-card h3 {
+            font-size: 14px;
+            color: #77738a;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .finance-card .amount {
+            color: #24105f;
+            font-size: 23px;
+            font-weight: bold;
+            overflow-wrap: anywhere;
+        }
+
+        .finance-card small {
+            display: block;
+            margin-top: 8px;
+            color: #88849a;
+            line-height: 1.4;
+        }
+
+        .finance-card.highlight {
+            border-left: 4px solid #2e05c2;
+        }
+
+        .finance-card.balance {
+            background: #f0edff;
+            border: 1px solid #dcd4ff;
+        }
+
+        .finance-card.balance .amount {
+            color: #2e05c2;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #88849a;
+            margin-top: 20px;
+            border-top: 1px solid #eeeaf8;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 18px 5%;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
+
+            .header-actions a {
+                text-align: center;
+                flex: 1;
+            }
+
+            .container {
+                padding: 25px 5%;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .finance-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .top-tools{display:flex;align-items:center;gap:14px}
+        .icon-link{position:relative;display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;background:#f0edff;color:#2e05c2 !important;text-decoration:none;font-size:22px;border:0;cursor:pointer}
+        .notify-wrap{position:relative}
+        .notify-count,.cart-count{position:absolute;top:-5px;right:-5px;min-width:19px;height:19px;padding:0 5px;border-radius:20px;background:#e63946;color:white;font-size:11px;font-weight:bold;display:flex;align-items:center;justify-content:center;border:2px solid white}
+        .notification-panel{display:none;position:absolute;right:0;top:50px;width:min(360px, calc(100vw - 35px));max-height:420px;overflow:auto;background:white;border:1px solid #e8e2f5;border-radius:12px;box-shadow:0 12px 35px rgba(25,12,70,.18);z-index:50;padding:14px;color:#25223a}
+        .notification-panel.open{display:block}.notification-panel h3{margin:2px 0 12px;color:#24105f}.notification-entry{padding:11px 2px;border-bottom:1px solid #eeeaf8}.notification-entry:last-child{border-bottom:0}.notification-entry p{margin:6px 0;color:#555;line-height:1.5;font-size:13px;white-space:pre-line}.notification-entry small{color:#888;font-size:11px}
+        .top-tools a{color:inherit}
+
+    
+/* MU Marketplace branded order journey */
+.order-tracking-section{margin-top:34px}.order-tracking-section>h2{color:#123c2c!important;font-size:25px;margin-bottom:7px!important}
+.tracking-intro{color:#64736b;margin:0 0 18px;font-size:14px}
+.tracking-card{background:linear-gradient(145deg,#fff,#f7fbf8);border:1px solid #dce9e0;border-radius:18px;padding:20px;margin:0 0 17px;box-shadow:0 8px 24px rgba(18,60,44,.07)}
+.tracking-card-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.tracking-card-head h3{color:#123c2c;font-size:18px}
+.tracking-meta{color:#68766e;font-size:13px;margin:7px 0 15px}.tracking-items{background:#f0f6f1;border-radius:12px;padding:12px 14px;margin:12px 0 17px;color:#31463a;line-height:1.7}
+.tracking-pill{display:inline-flex;border-radius:30px;padding:7px 12px;background:#e4eee8;color:#123c2c;font-size:12px;font-weight:700;text-transform:capitalize}
+.tracking-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:16px 0 13px}.tracking-step{text-align:center;min-width:0}
+.tracking-step .step-dot{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;margin:0 auto 8px;background:#e6eae7;color:#728078;font-weight:800;border:2px solid #d8e0da}
+.tracking-step.done .step-dot{background:#123c2c;color:white;border-color:#123c2c}.tracking-step.current .step-dot{background:#fff4d8;color:#8b5b00;border:2px solid #d8a83e}
+.tracking-step .step-label{color:#69766e;font-size:11px;line-height:1.35;display:block}.tracking-step.done .step-label,.tracking-step.current .step-label{color:#123c2c;font-weight:700}
+.tracking-status-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:16px}
+.tracking-status-box{background:#f4f7f4;border-radius:11px;padding:11px}.tracking-status-box small{display:block;color:#718078;font-size:11px;margin-bottom:5px}
+.tracking-status-box strong{color:#203d2d;font-size:13px;text-transform:capitalize;overflow-wrap:anywhere}
+.tracking-note{color:#69766e;font-size:12px;line-height:1.5;margin-top:14px}.tracking-empty{background:white;border:1px dashed #c9d9ce;padding:22px;border-radius:14px;color:#64736b}
+.brand-lockup{display:flex;align-items:center;gap:10px;min-width:0}.brand-lockup img{width:54px;height:54px;object-fit:contain;flex:0 0 auto}.brand-lockup h2{margin:0}
+.admin-tracking-form{background:#f5f9f6;border:1px solid #dce9e0;border-radius:13px;padding:13px}
+.admin-tracking-form .tracking-control-group{background:white;border:1px solid #e1ebe4;border-radius:10px;padding:11px;margin-bottom:10px}
+.admin-tracking-form .tracking-control-group strong{display:block;color:#123c2c;margin-bottom:7px}
+.admin-tracking-form label{display:flex!important;align-items:center;gap:8px;line-height:1.5;color:#3e5145;cursor:pointer}
+.admin-tracking-form input[type=checkbox],.admin-tracking-form input[type=radio]{accent-color:#176b45;width:16px;height:16px;flex:0 0 auto}
+.admin-tracking-form button{width:100%;border:0;border-radius:9px;padding:11px 13px;background:#123c2c;color:white;font-weight:700;cursor:pointer}
+@media(max-width:560px){.tracking-card{padding:15px}.tracking-steps{gap:3px}.tracking-step .step-label{font-size:10px}.tracking-status-grid{grid-template-columns:1fr}.tracking-card-head h3{font-size:16px}.brand-lockup img{width:43px;height:43px}}
+
+
+.dashboard-search-wrap{width:min(100%,900px);margin:20px auto 28px;padding:0 22px;box-sizing:border-box}
+.dashboard-search{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #dce8df;border-radius:16px;padding:8px 9px 8px 16px;box-shadow:0 8px 24px rgba(18,60,44,.08);transition:border-color .2s,box-shadow .2s}
+.dashboard-search:focus-within{border-color:#b68a2d;box-shadow:0 0 0 4px rgba(182,138,45,.13),0 10px 28px rgba(18,60,44,.1)}
+.dashboard-search-icon{font-size:27px;line-height:1;color:#8b9b90;transform:rotate(-20deg)}
+.dashboard-search input{flex:1;min-width:0;border:0!important;outline:0!important;background:transparent!important;padding:12px 4px!important;font-size:15px;color:#173c2c;box-shadow:none!important}
+.dashboard-search input::placeholder{color:#91a097}
+.dashboard-search button{border:0;border-radius:11px;background:#123c2c;color:#fff;padding:12px 20px;font-weight:700;cursor:pointer;transition:background .2s,transform .2s}
+.dashboard-search button:hover{background:#1b5b40;transform:translateY(-1px)}
+.dashboard-search-hint{font-size:12px;color:#829087;margin:7px 4px 0}
+@media(max-width:520px){.dashboard-search-wrap{padding:0 14px;margin:14px auto 22px}.dashboard-search{gap:7px;padding:6px 7px 6px 11px;border-radius:13px}.dashboard-search input{font-size:13px}.dashboard-search button{padding:11px 13px;font-size:13px}.dashboard-search-hint{font-size:11px}}
+
+
+/* Consistent MU Marketplace button and icon system */
+:root{--mu-green:#123c2c;--mu-green-2:#1b5b40;--mu-gold:#c69a3a;--mu-border:#dce8df;--mu-shadow:0 5px 16px rgba(18,60,44,.12)}
+.ui-icon{width:21px;height:21px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.icon-link,.home-icon-link{width:46px;height:46px;border-radius:14px!important;background:#fff!important;color:var(--mu-green)!important;border:1px solid var(--mu-border)!important;box-shadow:0 3px 10px rgba(18,60,44,.08);transition:transform .18s,box-shadow .18s,border-color .18s}
+.icon-link:hover,.home-icon-link:hover{transform:translateY(-2px);border-color:#c69a3a!important;box-shadow:var(--mu-shadow)}
+.notify-count,.cart-count,.home-icon-count{background:#c43d43!important;box-shadow:0 2px 5px #0002}
+button,.btn,.button,.card a,.logout,.switch-account,.mark-paid-button,.payout-form button,.admin-tracking-form button,.get-app-button,.dashboard-search button{font-family:inherit;font-weight:700;letter-spacing:.01em;transition:transform .18s ease,box-shadow .18s ease,background .18s ease,border-color .18s ease}
+.container button,.container a.card-action,.card a,.logout,.switch-account,.mark-paid-button,.payout-form button,.admin-tracking-form button,.dashboard-search button{border-radius:11px!important;box-shadow:0 3px 9px rgba(18,60,44,.12);min-height:40px}
+.card a,.mark-paid-button,.payout-form button,.admin-tracking-form button,.dashboard-search button{background:linear-gradient(135deg,#123c2c,#1d6546)!important;color:#fff!important;border:1px solid #123c2c!important;padding:11px 17px!important;text-decoration:none!important}
+.logout{background:linear-gradient(135deg,#a83c3c,#c84d4d)!important;color:#fff!important;border:1px solid #a83c3c!important;padding:10px 17px!important;text-decoration:none!important}
+.switch-account{background:#fff!important;color:#123c2c!important;border:1px solid #cbdccf!important;padding:10px 16px!important;text-decoration:none!important}
+button:hover,.card a:hover,.logout:hover,.switch-account:hover,.mark-paid-button:hover,.payout-form button:hover,.admin-tracking-form button:hover,.dashboard-search button:hover,.get-app-button:hover{transform:translateY(-2px);box-shadow:0 7px 17px rgba(18,60,44,.18)!important}
+button:active,.card a:active,.logout:active,.switch-account:active{transform:translateY(0) scale(.98)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid rgba(198,154,58,.45)!important;outline-offset:2px}
+.dashboard-search{border-radius:18px!important;border:1px solid #d5e3d9!important;box-shadow:0 8px 24px rgba(18,60,44,.09)!important}
+.dashboard-search button{min-width:105px}
+.notification-panel{border:1px solid #dce8df!important;border-radius:16px!important;box-shadow:0 16px 40px rgba(18,60,44,.18)!important}
+.notification-panel h3{color:#123c2c!important}
+@media(max-width:520px){.icon-link,.home-icon-link{width:42px;height:42px}.container button,.card a,.logout,.switch-account{min-height:38px}}
+
+
+.dashboard-search{max-width:760px!important;border-radius:999px!important;padding:6px 7px 6px 17px!important}
+.dashboard-search input{font-size:14px!important;padding:10px 4px!important}
+.dashboard-search button{width:42px!important;height:42px!important;min-width:42px!important;min-height:42px!important;padding:0!important;border-radius:50%!important;display:grid!important;place-items:center!important}
+.dashboard-search button .ui-icon{width:19px;height:19px;stroke:currentColor}
+
+
+.dashboard-messages-link{position:relative;display:inline-flex;align-items:center;justify-content:center;width:43px;height:43px;flex:0 0 43px;border:1px solid rgba(255,255,255,.28);border-radius:50%;background:rgba(255,255,255,.13);color:inherit;text-decoration:none;transition:background .18s,transform .18s}
+.dashboard-messages-link:hover{background:rgba(255,255,255,.24);transform:translateY(-1px)}
+.dashboard-messages-link svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.dashboard-message-count{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 4px;display:flex;align-items:center;justify-content:center;border:2px solid #123c2c;border-radius:20px;background:#c69a3a;color:#173626;font-size:10px;font-weight:800}
+
+</style>
+</head>
+
+<body>
+
+    <header>
+
+        <div class="brand-lockup"><img src="{{ url_for('static', filename='images/branding/mu-marketplace-logo.png') }}" alt="MU Marketplace logo"><h2>MU Marketplace</h2></div>
+
+        <div class="header-actions">
+            <div class="top-tools">
+                <a class="dashboard-messages-link" href="{{ url_for('message_inbox') }}" aria-label="Product enquiry messages" title="Product enquiry messages">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m4 7 8 6 8-6"></path></svg>
+            {% if unread_message_count %}<span class="dashboard-message-count">{{ unread_message_count }}</span>{% endif %}
+        </a>
+                
+                <div class="notify-wrap">
+                    <button class="icon-link" id="notificationBell" type="button" aria-label="Notifications" title="Notifications"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>{% if unread_count %}<span class="notify-count" id="notificationCount">{{ unread_count }}</span>{% endif %}</button>
+                    <div class="notification-panel" id="notificationPanel">
+                        <h3>Notifications</h3>
+                        {% for notification in notifications %}
+                        <article class="notification-entry"><strong>{{ notification.title }}</strong><p>{{ notification.message }}</p><small>{{ notification.created_at }}</small></article>
+                        {% else %}<p class="muted">No notifications yet.</p>{% endfor %}
+                    </div>
+                </div>
+            </div>
+            <a class="switch-account"
+               href="{{ url_for('switch_account') }}">
+                Switch Account
+            </a>
+
+            <a class="logout" href="{{ url_for('logout') }}">
+                Logout
+            </a>
+        </div>
+    </header>
+
+<div class="dashboard-search-wrap">
+  <form class="dashboard-search" action="{{ url_for('home') }}" method="get" role="search">
+    <span class="dashboard-search-icon" aria-hidden="true">⌕</span>
+    <input type="search" name="q" placeholder="Search products, categories and more..." aria-label="Search marketplace" autocomplete="off">
+    <button type="submit" aria-label="Search"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg></button>
+  </form>
+  <p class="dashboard-search-hint">Find what you need across MU Marketplace</p>
+</div>
+
+
+    <main class="container">
+
+        <section class="welcome" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+            {% if seller_profile and seller_profile['profile_picture'] %}
+                <img src="{{ url_for('static', filename=seller_profile['profile_picture']) }}"
+                     alt="Seller profile picture"
+                     style="width:76px;height:76px;border-radius:50%;object-fit:cover;border:3px solid #ded5ff;">
+            {% else %}
+                <div style="width:76px;height:76px;border-radius:50%;background:#eee9ff;display:flex;align-items:center;justify-content:center;font-size:30px;">👤</div>
+            {% endif %}
+            <div>
+                <h1>Welcome, {{ user_name }}!</h1>
+                <p>Welcome to your seller dashboard.</p>
+            </div>
+        </section>
+
+        <p style="margin:0 0 22px;"><a href="{{ url_for('message_inbox') }}" style="display:inline-block;background:#2e05c2;color:white;padding:11px 17px;border-radius:8px;text-decoration:none;">💬 Product Enquiries ({{ message_conversations|length }})</a></p>
+
+        <!-- Seller Financial Summary -->
+        <section class="finance-section">
+
+            <div class="finance-heading">
+                <h2>My Financial Summary</h2>
+                <p>Track your sales, commissions, earnings and payouts.</p>
+            </div>
+
+            <div class="finance-grid">
+
+                <div class="finance-card">
+                    <h3>Total Sales</h3>
+                    <div class="amount">
+                        K{{ "%.2f"|format(financial_summary.total_sales|float) }}
+                    </div>
+                    <small>Total value of your products sold.</small>
+                </div>
+
+                <div class="finance-card">
+                    <h3>Total Commissions</h3>
+                    <div class="amount">
+                        K{{ "%.2f"|format(financial_summary.total_commissions|float) }}
+                    </div>
+                    <small>Total marketplace commission deducted.</small>
+                </div>
+
+                <div class="finance-card">
+                    <h3>Pending Commissions</h3>
+                    <div class="amount">
+                        K{{ "%.2f"|format(financial_summary.pending_commissions|float) }}
+                    </div>
+                    <small>Commissions awaiting payment processing.</small>
+                </div>
+
+                <div class="finance-card">
+                    <h3>Paid Commissions</h3>
+                    <div class="amount">
+                        K{{ "%.2f"|format(financial_summary.paid_commissions|float) }}
+                    </div>
+                    <small>Commissions already marked as paid.</small>
+                </div>
+
+                <div class="finance-card highlight">
+                    <h3>Net Earnings</h3>
+                    <div class="amount">
+                        K{{ "%.2f"|format(financial_summary.net_earnings|float) }}
+                    </div>
+                    <small>Your sales after commission deductions.</small>
+                </div>
+
+                <div class="finance-card">
+                    <h3>Total Payouts Received</h3>
+                    <div class="amount">
+                        K{{ "%.2f"|format(financial_summary.total_paid_payouts|float) }}
+                    </div>
+                    <small>Money already paid to you.</small>
+                </div>
+
+                <div class="finance-card">
+                    <h3>Pending Payouts</h3>
+                    <div class="amount">
+                        K{{ "%.2f"|format(financial_summary.pending_payouts|float) }}
+                    </div>
+                    <small>Payouts awaiting processing.</small>
+                </div>
+
+                <div class="finance-card balance">
+                    <h3>Remaining Balance</h3>
+                    <div class="amount">
+                        K{{ "%.2f"|format(financial_summary.remaining_balance|float) }}
+                    </div>
+                    <small>Your outstanding earnings after recorded payouts.</small>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- Existing Dashboard Navigation -->
+        <section class="dashboard-grid">
+
+            <div class="card">
+                <div>
+                    <h3>My Products</h3>
+                    <p>View and manage your listed products.</p>
+                </div>
+                <a href="{{ url_for('my_products') }}">
+                    Manage Products
+                </a>
+            </div>
+
+            <div class="card"><div><h3>Seller Performance</h3><p>Track completed sales, popular products, stock and customer ratings.</p></div><a href="{{ url_for('seller_performance') }}">View Performance</a></div>
+            <div class="card"><div><h3>Seller Verification</h3><p>Submit details and check your verification status.</p></div><a href="{{ url_for('seller_verification') }}">Manage Verification</a></div>
+            <div class="card">
+                <div>
+                    <h3>My Sales</h3>
+                    <p>View your sales and customer orders.</p>
+                </div>
+                <a href="{{ url_for('seller_sales') }}">
+                    View Sales
+                </a>
+            </div>
+
+            <div class="card">
+                <div>
+                    <h3>My Account</h3>
+                    <p>Manage your personal account information.</p>
+                </div>
+                <a href="{{ url_for('seller_account') }}">
+                    Manage Account
+                </a>
+            </div>
+
+            <div class="card">
+                <div>
+                    <h3>Add Product</h3>
+                    <p>Upload a new product to the marketplace.</p>
+                </div>
+                <a href="{{ url_for('add_product_page') }}">
+                    Add Product
+                </a>
+            </div>
+
+        </section>
+
+
+        <section class="order-tracking-section">
+<h2>Order Tracking</h2><p class="tracking-intro">See how each order is progressing. The marketplace admin coordinates with you.</p>
+{% for order in tracking %}
+{% set confirmed = order.order_status in ('confirmed','completed') %}
+{% set paid = order.payment_status in ('paid','completed') %}
+{% set collected = order.delivery_status in ('collected','on_the_way','delivered') %}
+<article class="tracking-card">
+<div class="tracking-card-head"><h3>Order {{ order.order_number }}</h3><span class="tracking-pill">{{ order.order_status|replace('_',' ')|title }}</span></div>
+<p class="tracking-meta">Received: {{ order.created_at }}</p>
+<div class="tracking-items">{% for item in order["items"] %}<div>{{ item.quantity }} × {{ item.product_name }} — K{{ '%.2f'|format(item.unit_price|float) }} each</div>{% endfor %}</div>
+<div class="tracking-steps">
+<div class="tracking-step done"><span class="step-dot">✓</span><span class="step-label">Order received</span></div>
+<div class="tracking-step {% if confirmed %}done{% else %}current{% endif %}"><span class="step-dot">{% if confirmed %}✓{% else %}2{% endif %}</span><span class="step-label">Confirmed</span></div>
+<div class="tracking-step {% if paid %}done{% else %}current{% endif %}"><span class="step-dot">{% if paid %}✓{% else %}3{% endif %}</span><span class="step-label">Payment received</span></div>
+<div class="tracking-step {% if collected %}done{% else %}current{% endif %}"><span class="step-dot">{% if collected %}✓{% else %}4{% endif %}</span><span class="step-label">Collected from you</span></div>
+</div>
+<div class="tracking-status-grid">
+<div class="tracking-status-box"><small>Order status</small><strong>{{ order.order_status|replace('_',' ')|title }}</strong></div>
+<div class="tracking-status-box"><small>Payment status</small><strong>{{ order.payment_status|replace('_',' ')|title if order.payment_status else 'Pending' }}</strong></div>
+<div class="tracking-status-box"><small>Delivery status</small><strong>{{ order.delivery_status|replace('_',' ')|title if order.delivery_status else 'Pending' }}</strong></div>
+</div>
+<p class="tracking-note">Buyer identity, contact details and delivery location remain private. The marketplace admin coordinates collection with you.</p>
+</article>
+{% else %}<p class="tracking-empty">No orders have been placed for your products yet.</p>{% endfor %}
+</section>
+
+    </main>
+
+    <footer>
+        &copy; 2026 MU Marketplace. All rights reserved.
+    </footer>
+
+
+<script>
+(function(){
+ const bell=document.getElementById('notificationBell');
+ const panel=document.getElementById('notificationPanel');
+ if(!bell||!panel)return;
+ bell.addEventListener('click',async function(){
+   const opening=!panel.classList.contains('open');
+   panel.classList.toggle('open');
+   if(opening){
+     try{await fetch("{{ url_for('notifications_read') }}",{method:'POST',headers:{'X-Requested-With':'XMLHttpRequest'}});}
+     catch(error){console.warn('Could not mark notifications as read.',error);}
+     const count=document.getElementById('notificationCount');
+     if(count)count.remove();
+   }
+ });
+ document.addEventListener('click',function(event){
+   if(!event.target.closest('.notify-wrap'))panel.classList.remove('open');
+ });
+})();
+</script>
+
+<section style="margin:24px 7%;background:#fff;padding:20px;border-radius:12px;"><h3>Help & Support</h3><p>Contact the marketplace admin about account, product or order issues.</p><a href="{{ url_for('support_center') }}">Get Support</a></section>
+
+
+<nav class="mu-bottom-nav" aria-label="Main navigation">
+    <a href="{{ url_for('home') }}"><span class="nav-icon">⌂</span><span>Home</span></a>
+    <a href="{{ url_for('seller_dashboard') }}" class="active" aria-current="page"><span class="nav-icon">◉</span><span>My Dashboard</span></a>
+</nav>
+
+
+<script>
+(function () {
+  if (window.muLiveNotificationsStarted) return;
+  window.muLiveNotificationsStarted = true;
+
+  const style = document.createElement('style');
+  style.textContent = `
+    .mu-alert-stack{position:fixed;right:18px;top:88px;z-index:99999;width:min(360px,calc(100vw - 28px));display:grid;gap:10px}
+    .mu-alert{background:#fff;border:1px solid #d9e7dd;border-left:5px solid #c69a3a;border-radius:14px;padding:14px 16px;box-shadow:0 12px 35px rgba(13,43,29,.2);animation:muAlertIn .25s ease}
+    .mu-alert strong{display:block;color:#123c2c;margin-bottom:5px}.mu-alert p{margin:0;color:#53645a;font-size:13px;line-height:1.45}
+    .mu-alert small{display:block;color:#87938b;margin-top:7px;font-size:11px}
+    .mu-alert-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 22px 0}
+    .mu-push-enable{border:1px solid #d8e5dc;background:#fff;color:#123c2c;border-radius:30px;padding:8px 13px;font-size:12px;font-weight:700;cursor:pointer}
+    .mu-push-enable.enabled{background:#e6f1e9;border-color:#b8d2c0}
+    @keyframes muAlertIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+  `;
+  document.head.appendChild(style);
+
+  const stack = document.createElement('div');
+  stack.className = 'mu-alert-stack';
+  stack.setAttribute('aria-live', 'polite');
+  document.body.appendChild(stack);
+
+  const tools = document.createElement('div');
+  tools.className = 'mu-alert-tools';
+  tools.innerHTML = '<button type="button" class="mu-push-enable">Enable phone notifications</button>';
+  const searchWrap = document.querySelector('.dashboard-search-wrap');
+  if (searchWrap) searchWrap.appendChild(tools);
+
+  const enableButton = tools.querySelector('button');
+  async function enablePhoneAlerts() {
+    if (!('Notification' in window)) {
+      enableButton.textContent = 'Phone alerts unavailable in this browser';
+      return;
+    }
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        enableButton.textContent = '✓ Phone notifications enabled';
+        enableButton.classList.add('enabled');
+        if ('serviceWorker' in navigator) {
+          const registration = await navigator.serviceWorker.ready;
+          if (registration && registration.showNotification) {
+            registration.showNotification('MU Marketplace alerts enabled', {
+              body: 'You will see alerts while the marketplace is open.',
+              icon: '/static/images/pwa/icon-192.png',
+              badge: '/static/images/pwa/icon-192.png'
+            });
+          }
+        }
+      } else {
+        enableButton.textContent = 'Allow notifications in phone settings';
+      }
+    } catch (error) {
+      enableButton.textContent = 'Could not enable phone notifications';
+    }
+  }
+  enableButton.addEventListener('click', enablePhoneAlerts);
+  if ('Notification' in window && Notification.permission === 'granted') {
+    enableButton.textContent = '✓ Phone notifications enabled';
+    enableButton.classList.add('enabled');
+  }
+
+  function showAlert(item) {
+    const card = document.createElement('article');
+    card.className = 'mu-alert';
+    const title = document.createElement('strong');
+    title.textContent = item.title || 'MU Marketplace';
+    const message = document.createElement('p');
+    message.textContent = item.message || 'You have a new update.';
+    const time = document.createElement('small');
+    time.textContent = item.created_at || 'Just now';
+    card.append(title, message, time);
+    stack.appendChild(card);
+    window.setTimeout(() => card.remove(), 8500);
+
+    if ('Notification' in window && Notification.permission === 'granted') {
+      const options = {
+        body: item.message || 'You have a new update.',
+        icon: '/static/images/pwa/icon-192.png',
+        badge: '/static/images/pwa/icon-192.png',
+        tag: 'mu-marketplace-' + item.id
+      };
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(reg => {
+          if (reg && reg.showNotification) reg.showNotification(item.title || 'MU Marketplace', options);
+          else new Notification(item.title || 'MU Marketplace', options);
+        }).catch(() => new Notification(item.title || 'MU Marketplace', options));
+      } else {
+        new Notification(item.title || 'MU Marketplace', options);
+      }
+    }
+  }
+
+  let lastId = 0;
+  let initialized = false;
+  async function poll() {
+    try {
+      const response = await fetch('/notifications/poll?since=' + lastId, {
+        credentials: 'same-origin',
+        headers: {'Accept':'application/json'}
+      });
+      if (!response.ok) return;
+      const data = await response.json();
+      if (!data.success) return;
+      const items = data.notifications || [];
+      if (!initialized) {
+        if (items.length) lastId = Math.max(lastId, ...items.map(x => Number(x.id) || 0));
+        initialized = true;
+        return;
+      }
+      items.forEach(item => {
+        lastId = Math.max(lastId, Number(item.id) || 0);
+        showAlert(item);
+      });
+    } catch (error) {
+      // Poll again on the next interval; a temporary network issue is harmless.
+    }
+  }
+  poll();
+  window.setInterval(poll, 5000);
+})();
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('form.dashboard-search').forEach(function (form) {
+    form.addEventListener('submit', function (event) {
+      const field = form.querySelector('input[name="q"]');
+      if (!field || !field.value.trim()) {
+        event.preventDefault();
+        window.location.href = "{{ url_for('home') }}";
+      }
+    });
+  });
+});
+</script>
+<script src="{{ url_for('static', filename='js/pull-to-refresh.js') }}" defer></script>
+</body>
+</html>

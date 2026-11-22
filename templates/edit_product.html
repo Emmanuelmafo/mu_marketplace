@@ -1,0 +1,294 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Product | MU Marketplace</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            color: #222;
+            padding: 25px 15px;
+        }
+
+        .container {
+            max-width: 750px;
+            margin: 20px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            color: #173f35;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            font-size: 15px;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .current-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .current-images img,
+        .preview img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .hint {
+            color: #777;
+            font-size: 13px;
+            margin-top: 7px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        button, .cancel {
+            padding: 13px 20px;
+            border: none;
+            border-radius: 7px;
+            font-size: 15px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        button {
+            background: #176b50;
+            color: white;
+        }
+
+        button:hover {
+            background: #10523d;
+        }
+
+        .cancel {
+            background: #e5e7eb;
+            color: #333;
+        }
+
+        .flash {
+            background: #fff1f0;
+            color: #a12622;
+            padding: 12px;
+            border-radius: 7px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Edit Product</h1>
+    <p class="subtitle">Update your product details below.</p>
+
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <div class="flash">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <form method="POST" enctype="multipart/form-data">
+
+        <div class="form-group">
+            <label for="name">Product Name</label>
+            <input
+                type="text"
+                id="name"
+                name="name"
+                value="{{ product['name'] }}"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea
+                id="description"
+                name="description"
+            >{{ product['description'] or '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="price">Price (K)</label>
+            <input
+                type="number"
+                id="price"
+                name="price"
+                min="0"
+                step="0.01"
+                value="{{ product['price'] }}"
+                required
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="category_id">Category</label>
+            <select id="category_id" name="category_id" required>
+                {% for category in categories %}
+                    <option
+                        value="{{ category['id'] }}"
+                        {% if category['id'] == product['category_id'] %}selected{% endif %}
+                    >
+                        {{ category['name'] }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="stock">Available Stock</label>
+            <input
+                type="number"
+                id="stock"
+                name="stock"
+                min="0"
+                value="{{ product['stock'] }}"
+                required
+            >
+        </div>
+
+        <!-- NEW: Product Pickup Location -->
+        <div class="form-group">
+            <label for="pickup_location">Product Pickup Location</label>
+            <input
+                type="text"
+                id="pickup_location"
+                name="pickup_location"
+                value="{{ product['pickup_location'] or '' }}"
+                placeholder="e.g. Mulungushi University, Main Campus, Library"
+                required
+            >
+            <p class="hint">
+                Enter where the buyer can collect this product.
+                The marketplace admin will communicate this location
+                to the buyer and coordinate collection or delivery.
+                Buyers and sellers do not communicate directly.
+            </p>
+        </div>
+
+        <div class="form-group">
+            <label>Current Product Images</label>
+
+            <div class="current-images">
+                {% for image in images %}
+                    <img
+                        src="{{ url_for('static', filename=image) }}"
+                        alt="Current product image"
+                    >
+                {% else %}
+                    <p>No images available.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="images">Upload New Images</label>
+            <input
+                type="file"
+                id="images"
+                name="images"
+                accept="image/png,image/jpeg,image/webp"
+                multiple
+            >
+            <p class="hint">
+                Select up to 5 images. Uploading new images replaces the current images.
+                Leave empty to keep the current images.
+            </p>
+
+            <div class="preview" id="preview"></div>
+        </div>
+
+        <div class="buttons">
+            <button type="submit">Save Changes</button>
+            <a href="{{ url_for('my_products') }}" class="cancel">Cancel</a>
+        </div>
+
+    </form>
+
+</div>
+
+<script>
+    const imageInput = document.getElementById("images");
+    const preview = document.getElementById("preview");
+
+    imageInput.addEventListener("change", function () {
+        preview.innerHTML = "";
+
+        if (this.files.length > 5) {
+            alert("You can select a maximum of 5 images.");
+            this.value = "";
+            return;
+        }
+
+        Array.from(this.files).forEach(file => {
+            if (!file.type.startsWith("image/")) return;
+
+            const image = document.createElement("img");
+            image.src = URL.createObjectURL(file);
+            image.alt = "New image preview";
+            preview.appendChild(image);
+        });
+    });
+</script>
+
+<script src="{{ url_for('static', filename='js/pull-to-refresh.js') }}" defer></script>
+</body>
+</html>

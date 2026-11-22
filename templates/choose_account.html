@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Choose Account - MU Marketplace</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5f3ff;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            color: #5b21b6;
+            text-align: center;
+            margin-bottom: 12px;
+            font-size: 26px;
+        }
+
+        .description {
+            color: #666;
+            text-align: center;
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        .account-button {
+            display: block;
+            width: 100%;
+            padding: 17px;
+            margin-bottom: 15px;
+            border: 2px solid #6d28d9;
+            border-radius: 9px;
+            background: white;
+            color: #5b21b6;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .account-button:hover {
+            background: #6d28d9;
+            color: white;
+        }
+
+        .account-button:last-child {
+            margin-bottom: 0;
+        }
+
+        .account-name {
+            display: block;
+            font-size: 13px;
+            font-weight: normal;
+            margin-top: 5px;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            color: #6d28d9;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Choose Your Account</h1>
+
+        <p class="description">
+            You have more than one account.
+            Select how you want to continue.
+        </p>
+
+        {% for account in accounts %}
+
+            <form method="POST">
+
+                <input
+                    type="hidden"
+                    name="role"
+                    value="{{ account.role }}"
+                >
+
+                <button
+                    type="submit"
+                    class="account-button"
+                >
+
+                    Continue as {{ account.role|capitalize }}
+
+                    <span class="account-name">
+                        {{ account.full_name }}
+                    </span>
+
+                </button>
+
+            </form>
+
+        {% endfor %}
+
+        <a href="{{ url_for('logout') }}" class="back-link">
+            Cancel and log out
+        </a>
+
+    </div>
+
+<script src="{{ url_for('static', filename='js/pull-to-refresh.js') }}" defer></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Databases and private instance data
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# User uploads
+static/uploads/
+
+# Logs
+*.log
+
+# Editor files
+.vscode/
+.idea/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+# Backup and temporary files
+merge_backup/
+*.bak
+*.tmp
+__pycache__/

@@ -1,0 +1,119 @@
+<section class="section" id="admin-seller-payouts">
+
+        <div class="section-heading">
+            <h2>Seller Finances</h2>
+            <p>Review individual seller earnings and payout balances.</p>
+        </div>
+
+        <div class="notice">
+            Important: Creating a payout records it as pending.
+            Send the seller the actual money separately. Only click
+            "Mark as Paid" after the payment has successfully been sent.
+            Creating a payout does not transfer money.
+        </div>
+
+        <div class="table-container">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Seller</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Total Sales</th>
+                        <th>Commissions</th>
+                        <th>Net Earnings</th>
+                        <th>Paid Payouts</th>
+                        <th>Pending Payouts</th>
+                        <th>Remaining Balance</th>
+                        <th>Create Payout</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for seller in sellers %}
+
+                    <tr>
+                        <td>{{ seller.full_name }}</td>
+                        <td>{{ seller.email }}</td>
+                        <td>{{ seller.phone }}</td>
+
+                        <td>
+                            K{{ "%.2f"|format(seller.total_sales|float) }}
+                        </td>
+
+                        <td>
+                            K{{ "%.2f"|format(seller.total_commissions|float) }}
+                        </td>
+
+                        <td>
+                            K{{ "%.2f"|format(seller.net_earnings|float) }}
+                        </td>
+
+                        <td>
+                            K{{ "%.2f"|format(seller.total_paid_payouts|float) }}
+                        </td>
+
+                        <td>
+                            K{{ "%.2f"|format(seller.pending_payouts|float) }}
+                        </td>
+
+                        <td>
+                            <strong>
+                                K{{ "%.2f"|format(seller.remaining_balance|float) }}
+                            </strong>
+                        </td>
+
+                        <td>
+
+                            {% if seller.remaining_balance > 0 %}
+
+                            <form class="payout-form"
+                                  method="POST"
+                                  action="{{ url_for('admin_create_payout') }}"
+                                  onsubmit="return confirm('Create this payout as pending? You will still need to send the seller the money separately.');">
+
+                                <input type="hidden"
+                                       name="seller_id"
+                                       value="{{ seller.seller_id }}">
+
+                                <input type="number"
+                                       name="amount"
+                                       min="0.01"
+                                       max="{{ seller.remaining_balance }}"
+                                       step="0.01"
+                                       placeholder="Amount (K)"
+                                       required>
+
+                                <button type="submit">
+                                    Create Pending Payout
+                                </button>
+
+                            </form>
+
+                            {% else %}
+
+                                <span class="status">No balance</span>
+
+                            {% endif %}
+
+                        </td>
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="10" class="empty">
+                            No seller accounts found.
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        </div>
+
+    </section>

@@ -1,0 +1,54 @@
+<section class="section" id="admin-financial-overview">
+
+        <div class="section-heading">
+            <h2>Marketplace Overview</h2>
+            <p>General statistics about marketplace activity.</p>
+        </div>
+
+        <div class="stats-grid">
+
+            <div class="stat-card highlight">
+                <h3>Total Users</h3>
+                <div class="number">{{ summary.total_users }}</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Total Buyers</h3>
+                <div class="number">{{ summary.total_buyers }}</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Total Sellers</h3>
+                <div class="number">{{ summary.total_sellers }}</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Admin Accounts</h3>
+                <div class="number">{{ summary.total_admins }}</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Total Orders</h3>
+                <div class="number">{{ summary.total_orders }}</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Pending Orders</h3>
+                <div class="number">{{ summary.pending_orders }}</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Completed Orders</h3>
+                <div class="number">{{ summary.completed_orders }}</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Total Order Value</h3>
+                <div class="number">
+                    K{{ "%.2f"|format(summary.total_order_value|float) }}
+                </div>
+            </div>
+
+        </div>
+
+    </section>

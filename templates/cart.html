@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart | MU Marketplace</title>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:Arial,sans-serif;background:#f4f5f9;color:#25223a}
+        header{background:#2e05c2;color:white;padding:18px 7%;display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+        header a{color:white;text-decoration:none}
+        .container{max-width:1050px;margin:32px auto;padding:0 20px}
+        h1{color:#24105f;margin-bottom:20px}
+        .cart-item{background:white;border:1px solid #eeeaf8;border-radius:12px;padding:18px;margin-bottom:14px;display:grid;grid-template-columns:100px 1fr auto;gap:18px;align-items:center}
+        .cart-item img{width:100px;height:90px;object-fit:cover;border-radius:8px;background:#f0edff}
+        .cart-item h3{color:#24105f;margin-bottom:7px}
+        .muted{color:#77738a;line-height:1.5}
+        .quantity-form,.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+        input{width:75px;padding:9px;border:1px solid #d8d4e5;border-radius:7px}
+        button,.button{border:0;border-radius:7px;padding:10px 14px;background:#2e05c2;color:white;text-decoration:none;cursor:pointer;font-weight:bold}
+        .remove{background:#e63946}
+        .summary{background:white;border:1px solid #eeeaf8;border-radius:12px;padding:20px;margin-top:22px;display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+        .total{font-size:22px;font-weight:bold;color:#24105f}
+        .empty{background:white;border-radius:12px;padding:30px;text-align:center;color:#77738a}
+        .flash{background:#f0edff;color:#2e05c2;padding:12px;border-radius:8px;margin-bottom:14px}
+        @media(max-width:650px){.cart-item{grid-template-columns:75px 1fr}.cart-item img{width:75px;height:75px}.cart-item .item-actions{grid-column:1/-1}.summary{align-items:flex-start;flex-direction:column}}
+    </style>
+</head>
+<body>
+<header>
+    <h2>MU Marketplace</h2>
+    <nav style="display:flex;gap:16px;flex-wrap:wrap">
+        <a href="{{ url_for('buyer_dashboard') }}">Buyer Dashboard</a>
+        <a href="{{ url_for('home') }}">Continue Shopping</a>
+    </nav>
+</header>
+<main class="container">
+    <h1>My Shopping Cart</h1>
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}<div class="flash">{{ message }}</div>{% endfor %}
+    {% endwith %}
+    {% if items %}
+        {% for item in items %}
+        <article class="cart-item">
+            {% if item.image %}
+                <img src="{{ url_for('static', filename=item.image) }}" alt="{{ item.name }}">
+            {% else %}
+                <div style="width:100px;height:90px;border-radius:8px;background:#f0edff;display:grid;place-items:center;color:#6b55a6">No image</div>
+            {% endif %}
+            <div>
+                <h3>{{ item.name }}</h3>
+                <p class="muted">Unit price: K{{ '%.2f'|format(item.price|float) }}</p>
+                <p class="muted">Available stock: {{ item.stock }}</p>
+                <form class="quantity-form" method="POST" action="{{ url_for('cart_update', cart_item_id=item.cart_item_id) }}">
+                    <label for="quantity-{{ item.cart_item_id }}">Quantity</label>
+                    <input id="quantity-{{ item.cart_item_id }}" type="number" name="quantity" min="1" max="{{ item.stock }}" value="{{ item.quantity }}" required>
+                    <button type="submit">Update</button>
+                </form>
+            </div>
+            <div class="item-actions">
+                <p class="total">K{{ '%.2f'|format(item.line_total|float) }}</p>
+                <div class="actions">
+                    <a class="button" href="{{ url_for('checkout', product_id=item.product_id) }}">Buy Now</a>
+                    <form method="POST" action="{{ url_for('cart_remove', cart_item_id=item.cart_item_id) }}">
+                        <button class="remove" type="submit">Remove</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+        <section class="summary">
+            <div>
+                <p class="muted">Cart total (before any delivery charges)</p>
+                <p class="total">K{{ '%.2f'|format(total|float) }}</p>
+            </div>
+            <a class="button" href="{{ url_for('home') }}">Continue Shopping</a>
+        </section>
+        <p class="muted" style="margin-top:12px">Select Buy Now on an item to place its order. The marketplace admin will coordinate communication, payment confirmation and delivery.</p>
+    {% else %}
+        <div class="empty">
+            <h2 style="color:#24105f;margin-bottom:10px">Your cart is empty</h2>
+            <p style="margin-bottom:18px">Browse products and add items to your cart.</p>
+            <a class="button" href="{{ url_for('home') }}">Go to Home</a>
+        </div>
+    {% endif %}
+</main>
+<script src="{{ url_for('static', filename='js/pull-to-refresh.js') }}" defer></script>
+</body>
+</html>

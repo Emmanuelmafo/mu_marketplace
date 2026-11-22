@@ -1,0 +1,278 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details | MU Marketplace</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f3fa;
+            color: #29243a;
+        }
+
+        header {
+            background: #5b2c91;
+            color: white;
+            padding: 20px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            background: #7445aa;
+            padding: 10px 16px;
+            border-radius: 7px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 22px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            color: #5b2c91;
+            margin-bottom: 18px;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 18px;
+        }
+
+        .detail p {
+            margin-top: 7px;
+            color: #625d6d;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 14px 10px;
+            border-bottom: 1px solid #eee9f4;
+            text-align: left;
+        }
+
+        th {
+            color: #5b2c91;
+            background: #f7f3fb;
+        }
+
+        .total {
+            text-align: right;
+            font-size: 20px;
+            font-weight: bold;
+            color: #5b2c91;
+            margin-top: 20px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: #eee5f8;
+            color: #5b2c91;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 10px;
+            color: #5b2c91;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .empty {
+            color: #777;
+            padding: 15px 0;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .card {
+                padding: 17px;
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 550px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2 style="color:white; margin:0;">MU Marketplace</h2>
+    <a href="{{ url_for('seller_sales') }}">Back to Sales</a>
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <h2>Order Details</h2>
+
+        <div class="details">
+            <div class="detail">
+                <strong>Order Number</strong>
+                <p>{{ order.order_number }}</p>
+            </div>
+
+            <div class="detail">
+                <strong>Order Date</strong>
+                <p>{{ order.created_at }}</p>
+            </div>
+
+            <div class="detail">
+                <strong>Order Status</strong>
+                <p><span class="status">{{ order.order_status }}</span></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Your Products in This Order</h2>
+
+        {% if items %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>K{{ "%.2f"|format(item.unit_price) }}</td>
+                    <td>K{{ "%.2f"|format(item.subtotal) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="total">
+            Your Sales Total: K{{ "%.2f"|format(seller_total) }}
+        </div>
+        {% else %}
+        <p class="empty">No products found in this order.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h2>Payment Information</h2>
+
+        <div class="details">
+            <div class="detail">
+                <strong>Payment Method</strong>
+                <p>{{ order.payment_method or "Not available" }}</p>
+            </div>
+
+            <div class="detail">
+                <strong>Payment Status</strong>
+                <p>{{ order.payment_status or "Not available" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Commission Information</h2>
+
+        <div class="details">
+            <div class="detail">
+                <strong>Commission Amount</strong>
+                <p>
+                    {% if order.commission_amount is not none %}
+                        K{{ "%.2f"|format(order.commission_amount) }}
+                    {% else %}
+                        Not available
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="detail">
+                <strong>Commission Rate</strong>
+                <p>
+                    {% if order.commission_rate is not none %}
+                        {{ "%.2f"|format(order.commission_rate) }}%
+                    {% else %}
+                        Not available
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="detail">
+                <strong>Commission Status</strong>
+                <p>{{ order.commission_status or "Not available" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Delivery Information</h2>
+
+        <div class="details">
+            <div class="detail">
+                <strong>Delivery Status</strong>
+                <p>{{ order.delivery_status or "Not available" }}</p>
+            </div>
+
+            <div class="detail">
+                <strong>Delivery Fee</strong>
+                <p>
+                    {% if order.delivery_fee is not none %}
+                        K{{ "%.2f"|format(order.delivery_fee) }}
+                    {% else %}
+                        Not available
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <a class="back" href="{{ url_for('seller_sales') }}">
+        ← Back to My Sales
+    </a>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/pull-to-refresh.js') }}" defer></script>
+</body>
+</html>

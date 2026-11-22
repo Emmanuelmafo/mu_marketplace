@@ -1,0 +1,254 @@
+
+/* Add Product Page */
+
+.add-product-page {
+    background: #f4f6f8;
+    min-height: 100vh;
+    color: #202938;
+    font-family: Arial, sans-serif;
+}
+
+/* Header */
+
+.product-header {
+    background: #ffffff;
+    padding: 18px 7%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.brand {
+    font-size: 23px;
+    font-weight: 800;
+    color: #16834a;
+    text-decoration: none;
+}
+
+.brand span {
+    color: #202938;
+}
+
+.back-link {
+    text-decoration: none;
+    color: #555f6d;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.back-link:hover {
+    color: #16834a;
+}
+
+/* Main container */
+
+.product-container {
+    max-width: 720px;
+    margin: 45px auto;
+    padding: 0 20px;
+}
+
+/* Heading */
+
+.product-heading {
+    margin-bottom: 25px;
+}
+
+.eyebrow {
+    color: #16834a;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+}
+
+.product-heading h1 {
+    font-size: 30px;
+    margin: 8px 0;
+    color: #172333;
+}
+
+.product-heading p:last-child {
+    color: #697586;
+    font-size: 15px;
+}
+
+/* Form */
+
+.product-form {
+    background: #ffffff;
+    padding: 35px;
+    border-radius: 12px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
+}
+
+.form-group {
+    margin-bottom: 23px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 9px;
+    color: #344054;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 13px 14px;
+    border: 1px solid #d5dbe3;
+    border-radius: 7px;
+    font-size: 14px;
+    background: #ffffff;
+    color: #202938;
+    outline: none;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    border-color: #16834a;
+    box-shadow: 0 0 0 3px rgba(22, 131, 74, 0.10);
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+/* Two-column fields */
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+/* Image upload */
+
+.upload-area {
+    border: 2px dashed #cbd5df;
+    border-radius: 9px;
+    padding: 25px;
+    text-align: center;
+    background: #f9fafb;
+}
+
+.upload-icon {
+    display: inline-flex;
+    width: 42px;
+    height: 42px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #e5f5eb;
+    color: #16834a;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.upload-area p {
+    font-weight: 600;
+    margin-bottom: 7px;
+}
+
+.upload-area small {
+    display: block;
+    color: #778292;
+    margin-bottom: 15px;
+}
+
+.upload-area input {
+    max-width: 100%;
+    border: none;
+    padding: 5px;
+    background: transparent;
+}
+
+/* Submit button */
+
+.submit-product {
+    width: 100%;
+    padding: 15px;
+    background: #16834a;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.submit-product:hover {
+    background: #106b3b;
+}
+
+/* Flash messages */
+
+.product-message {
+    background: #fff3cd;
+    color: #856404;
+    padding: 13px 16px;
+    border-radius: 7px;
+    margin-bottom: 18px;
+    font-size: 14px;
+}
+
+/* Mobile layout */
+
+@media (max-width: 600px) {
+
+    .product-header {
+        padding: 16px 5%;
+    }
+
+    .brand {
+        font-size: 19px;
+    }
+
+    .product-container {
+        margin: 30px auto;
+        padding: 0 15px;
+    }
+
+    .product-heading h1 {
+        font-size: 25px;
+    }
+
+    .product-form {
+        padding: 22px 18px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+}
+/* Multiple product image previews */
+
+.image-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.image-preview img {
+    width: 100%;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #e1e5eb;
+}
+
+#image-count {
+    color: #16834a;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 12px;
+}

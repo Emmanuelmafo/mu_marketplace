@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ conversation.product_name }} - Chat | MU Marketplace</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f4fb;font-family:Arial,sans-serif;color:#29243b}
+header{background:white;padding:16px 5%;border-bottom:1px solid #e9e5f5}header a{display:inline-flex;align-items:center;gap:8px;padding:11px 17px;background:#2e05c2;color:#fff;text-decoration:none;border-radius:9px;font-weight:600;min-height:42px;box-shadow:0 2px 5px rgba(46,5,194,.15)}header a:hover{background:#21038f}
+main{max-width:850px;margin:25px auto;padding:0 4%}.chatbox{background:white;border:1px solid #e9e5f5;border-radius:14px;overflow:hidden}
+.chathead{padding:18px 20px;background:#f0edff}.chathead h1{font-size:21px;color:#24105f;margin:0 0 7px}.chathead p{margin:0;color:#6e6883;font-size:13px;line-height:1.5}
+.messages{padding:18px;min-height:300px;max-height:60vh;overflow:auto;background:#fbfaff}
+.message{max-width:82%;padding:12px 14px;border-radius:12px;margin:10px 0;line-height:1.45;overflow-wrap:anywhere}
+.message.mine{margin-left:auto;background:#e9e2ff}.message.other{background:#f0f0f4}
+.message.admin{background:#e5f5ed;border:1px solid #cdebd9}
+.message small{display:block;color:#77738a;font-size:11px;margin-bottom:5px}
+form{padding:16px;border-top:1px solid #eeeaf8;display:flex;flex-direction:column;gap:10px}
+textarea{display:block;position:relative;z-index:2;width:100%;min-height:110px;padding:13px;border:1px solid #bdb6d3;border-radius:8px;font:inherit;resize:vertical;background:#fff;color:#29243b;pointer-events:auto;opacity:1;cursor:text;line-height:1.5}textarea:focus{outline:2px solid #2e05c2;outline-offset:1px;border-color:#2e05c2}
+select{padding:11px;border:1px solid #d8d4e5;border-radius:8px;font:inherit}
+button{background:#2e05c2;color:white;border:0;border-radius:8px;padding:12px 18px;font-weight:bold;cursor:pointer;align-self:flex-end}
+.notice{padding:12px 16px;color:#645d79;font-size:13px;line-height:1.5}
+@media(max-width:550px){.message{max-width:95%}main{margin:15px auto}}
+</style></head><body>
+<header><a href="{{ url_for('message_inbox') }}">← Back to messages</a></header>
+<main><section class="chatbox">
+<div class="chathead"><h1>{{ conversation.product_name }}</h1>
+{% if role == 'admin' %}
+<p>Buyer: {{ conversation.buyer_name }} · Seller: {{ conversation.seller_name }}</p>
+{% endif %}
+</div>
+<div class="messages">
+{% for message in messages %}
+<div class="message {% if message.sender_role == 'admin' %}admin{% elif (role == 'buyer' and message.sender_role == 'buyer') or (role == 'seller' and message.sender_role == 'seller') %}mine{% else %}other{% endif %}">
+<small>{% if message.sender_role == 'admin' %}Marketplace Admin{% elif message.sender_role == 'buyer' %}Buyer{% else %}Seller{% endif %} · {{ message.created_at }}
+{% if role == 'admin' %}→ {{ message.recipient_role|capitalize }}{% endif %}</small>
+{{ message.message }}
+</div>
+{% else %}<p class="notice">No messages yet. Start the conversation below.</p>{% endfor %}
+</div>
+{% if role == 'admin' %}
+<form method="POST">
+<label for="recipient_role">Forward message to</label>
+<select name="recipient_role" id="recipient_role" required>
+<option value="">Choose recipient</option><option value="seller">Seller</option><option value="buyer">Buyer</option>
+</select>
+<textarea name="message" rows="4" maxlength="3000" placeholder="Write the message you want to forward..." autocomplete="off" spellcheck="true" required></textarea>
+<button type="submit">Forward Message</button>
+</form>
+{% else %}
+<form method="POST" action="{{ url_for('send_chat_message', conversation_id=conversation.id) }}">
+<textarea name="message" rows="4" maxlength="3000" placeholder="Type your message..." autocomplete="off" spellcheck="true" required></textarea>
+<button type="submit">Send to Admin</button>
+</form>
+{% endif %}
+<div class="notice">Privacy: buyer and seller messages are only exchanged through the marketplace admin. Direct contact details are not shared in this chat.</div>
+</section></main><script src="{{ url_for('static', filename='js/pull-to-refresh.js') }}" defer></script>
+</body></html>

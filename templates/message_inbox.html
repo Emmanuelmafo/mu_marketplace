@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Messages | MU Marketplace</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f4fb;font-family:Arial,sans-serif;color:#29243b}
+header{background:white;padding:18px 6%;border-bottom:1px solid #e9e5f5}header a{display:inline-flex;align-items:center;gap:8px;padding:11px 17px;background:#2e05c2;color:#fff;text-decoration:none;border-radius:9px;font-weight:600;min-height:42px;box-shadow:0 2px 5px rgba(46,5,194,.15)}header a:hover{background:#21038f}
+main{max-width:900px;margin:32px auto;padding:0 5%}h1{color:#24105f}.item{display:block;background:white;border:1px solid #e9e5f5;border-radius:12px;padding:17px;margin:12px 0;text-decoration:none;color:inherit}
+.item:hover{border-color:#2e05c2}.item h3{margin:0 0 8px;color:#2e05c2}.muted{color:#77738a;font-size:13px}.last{margin-top:10px;line-height:1.5}.empty{background:white;padding:25px;border-radius:12px;color:#77738a}
+</style></head><body>
+<header><a href="{{ url_for('dashboard') }}">← Back to dashboard</a></header>
+<main><h1>Messages</h1>
+{% for conversation in conversations %}
+<a class="item" href="{% if role == 'admin' %}{{ url_for('admin_message_chat', conversation_id=conversation.id) }}{% else %}{{ url_for('view_chat', conversation_id=conversation.id) }}{% endif %}">
+<h3>{{ conversation.product_name }}</h3>
+<div class="muted">
+{% if role == 'admin' %}Buyer: {{ conversation.buyer_name }} · Seller: {{ conversation.seller_name }}
+{% elif role == 'buyer' %}Product enquiry · Admin-mediated chat
+{% else %}Product enquiry · Admin-mediated chat{% endif %}
+</div>
+<div class="last">{{ conversation.last_message or 'No messages yet. Open to view conversation.' }}</div>
+</a>
+{% else %}<div class="empty">No conversations yet.</div>{% endfor %}
+</main><script src="{{ url_for('static', filename='js/pull-to-refresh.js') }}" defer></script>
+</body></html>
