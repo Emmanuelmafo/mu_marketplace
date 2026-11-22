@@ -47,3 +47,46 @@ table { max-width:100%; }
   .grid, .product-grid, .products-grid, .category-grid, .dashboard-grid, .stats-grid, .cards-grid { grid-template-columns:minmax(0,1fr)!important; }
   .mu-bottom-nav a { font-size:11px!important; }
 }
+
+/* Homepage header: preserve desktop item order on phones.
+   Items may wrap to new rows, but none of the desktop actions are hidden. */
+@media (max-width: 650px) {
+  .marketplace-sticky-header {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+  }
+  .marketplace-sticky-header > .brand-lockup {
+    order: 1;
+    flex: 0 1 auto;
+  }
+  .marketplace-sticky-header > .buy-from-abroad-button {
+    order: 2;
+    flex: 0 0 auto;
+    margin: 4px !important;
+  }
+  .marketplace-sticky-header > .home-header-actions {
+    order: 3;
+    width: 100% !important;
+    flex: 0 0 100% !important;
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+  }
+  .marketplace-sticky-header .get-app-button {
+    display: inline-flex !important;
+  }
+  .marketplace-sticky-header nav {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+  .marketplace-sticky-header nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    white-space: nowrap;
+  }
+}
+
