@@ -146,7 +146,7 @@ class _PostgresConnection:
 
         match = re.match(r"PRAGMA\s+table_info\(([^)]+)\)", sql.strip(), re.I)
         if match:
-            table = match.group(1).strip(" \\"'")
+            table = match.group(1).strip().strip('"').strip("'")
             cursor = self._connection.cursor(cursor_factory=RealDictCursor)
             cursor.execute(
                 """
