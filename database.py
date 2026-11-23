@@ -461,15 +461,27 @@ def migrate_commission_amounts(connection):
         elif price < 100:
             tier_commission = 10.0
         else:
-            tier_commission = 10.0 + 5.0 * math.ceil(price / 100.0)
+            tier_commission = 15.0 + 5.0 * math.floor(
+                (price - 100.0) / 100.0
+            )
 
         capped_unit_commission = min(tier_commission, price)
         key = row["commission_id"]
-        # K20-and-below products incur one commission per order line,
-        # regardless of how many units were ordered.
-        commission_quantity = 1 if price <= 20 else quantity
+
+        if price <= 100:
+            if quantity <= 5:
+                commission_multiplier = 1
+            elif quantity <= 10:
+                commission_multiplier = 2
+            else:
+                commission_multiplier = 2 + math.ceil(
+                    (quantity - 10) / 10.0
+                )
+        else:
+            commission_multiplier = quantity
+
         commission_caps[key] = commission_caps.get(key, 0.0) + (
-            capped_unit_commission * commission_quantity
+            capped_unit_commission * commission_multiplier
         )
 
     for commission_id, maximum_amount in commission_caps.items():
