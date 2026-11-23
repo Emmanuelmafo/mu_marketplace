@@ -146,6 +146,16 @@ def create_app():
 
     app.config.from_object("config.Config")
 
+    # Convert stored image references into browser-ready URLs.
+    def image_src(image_reference):
+        if not image_reference:
+            return ""
+        if image_reference.startswith(("https://", "http://")):
+            return image_reference
+        return url_for("static", filename=image_reference)
+
+    app.jinja_env.filters["image_src"] = image_src
+
     if not app.config.get("SECRET_KEY"):
         raise RuntimeError(
             "Set SECRET_KEY in your environment or Config."
@@ -1737,16 +1747,36 @@ def create_app():
 
                 for image, filename in valid_images:
 
-                    image_path = os.path.join(
-                        app.config["UPLOAD_FOLDER"],
-                        filename
-                    )
+                    if os.environ.get("VERCEL"):
+                        # Persist product photos in public Vercel Blob storage.
+                        from vercel.blob import BlobClient
 
-                    image.save(image_path)
+                        if not os.environ.get("BLOB_READ_WRITE_TOKEN"):
+                            raise RuntimeError(
+                                "Product image storage is not configured. Please contact the marketplace administrator."
+                            )
 
-                    saved_images.append(
-                        f"uploads/products/{filename}"
-                    )
+                        image.stream.seek(0)
+                        content_type = "image/jpeg"
+                        if filename.endswith(".png"):
+                            content_type = "image/png"
+                        elif filename.endswith(".webp"):
+                            content_type = "image/webp"
+                        blob = BlobClient().put(
+                            f"products/{filename}",
+                            image.stream.read(),
+                            access="public",
+                            add_random_suffix=True,
+                            content_type=content_type,
+                        )
+                        saved_images.append(blob.url)
+                    else:
+                        image_path = os.path.join(
+                            app.config["UPLOAD_FOLDER"],
+                            filename
+                        )
+                        image.save(image_path)
+                        saved_images.append(f"uploads/products/{filename}")
 
                 # NEW: Pass pickup location to the product service
                 success, message = add_product(
