@@ -1750,7 +1750,7 @@ def create_app():
 
                     if os.environ.get("VERCEL"):
                         # Persist product photos in public Vercel Blob storage.
-                        from vercel.blob import AsyncBlobClient
+                        from vercel import blob
 
                         if not os.environ.get("BLOB_READ_WRITE_TOKEN"):
                             raise RuntimeError(
@@ -1763,9 +1763,8 @@ def create_app():
                             content_type = "image/png"
                         elif filename.endswith(".webp"):
                             content_type = "image/webp"
-                        blob_client = AsyncBlobClient()
-                        blob = asyncio.run(
-                            blob_client.put(
+                        uploaded_blob = asyncio.run(
+                            blob.put_blob(
                                 f"products/{filename}",
                                 image.stream.read(),
                                 access="public",
@@ -1773,7 +1772,7 @@ def create_app():
                                 content_type=content_type,
                             )
                         )
-                        saved_images.append(blob.url)
+                        saved_images.append(uploaded_blob.url)
                     else:
                         image_path = os.path.join(
                             app.config["UPLOAD_FOLDER"],
