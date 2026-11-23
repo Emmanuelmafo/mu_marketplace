@@ -6,7 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <meta name="theme-color" content="#123c2c">
-    <meta name="description" content="Shop and sell conveniently through MU Marketplace.">
+    <meta name="description" content="MU Marketplace is an online marketplace for buying and selling products. Browse products, compare prices and place orders.">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <link rel="canonical" href="{{ url_for('home', _external=True) }}">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="MU Marketplace | Buy and Sell Online">
+    <meta property="og:description" content="Browse products and shop through MU Marketplace.">
+    <meta property="og:url" content="{{ url_for('home', _external=True) }}">
+    <meta name="twitter:card" content="summary">
+
     <link rel="manifest" href="{{ url_for('static', filename='manifest.webmanifest') }}">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/pwa/icon-192.png') }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/pwa/icon-192.png') }}">
