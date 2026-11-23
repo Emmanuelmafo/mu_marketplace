@@ -374,6 +374,21 @@ def create_app():
             db.close()
         return redirect(url_for("admin_dashboard"))
 
+    # Explicitly publish crawl directives for public storefront pages.
+    # This also overrides any application-level noindex header on these routes.
+    @app.after_request
+    def set_search_indexing_headers(response):
+        public_indexable_endpoints = {
+            "home",
+            "browse_products",
+            "product_page",
+            "robots_txt",
+            "sitemap_xml",
+        }
+        if request.endpoint in public_indexable_endpoints:
+            response.headers["X-Robots-Tag"] = "index, follow"
+        return response
+
     # Public discovery endpoints: allow search engines to crawl the storefront.
     @app.route("/robots.txt")
     def robots_txt():
