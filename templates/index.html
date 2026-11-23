@@ -572,7 +572,7 @@
                         {% for product in category_products %}
                             <article class="home-product-card">
                                 {% if product.image %}
-                                    <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.name }}">
+                                    <img src="{{ product.image|image_src }}" alt="{{ product.name }}">
                                 {% else %}
                                     <div class="home-product-no-image">No image available</div>
                                 {% endif %}
