@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{ product.name }} | MU Marketplace</title>
-<meta name="description" content="{{ product.description|striptags|truncate(155, True, '…') }}">
+<title>{{ product.name }} | MU Marketplace - Mulungushi University</title>
+<meta name="description" content="{{ product.description|striptags|truncate(115, True, '…') }} | Listed on MU Marketplace for the Mulungushi University community.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <link rel="canonical" href="{{ url_for('product_page', product_id=product.id, _external=True) }}">
 <meta property="og:type" content="product">
-<meta property="og:title" content="{{ product.name }} | MU Marketplace">
+<meta property="og:title" content="{{ product.name }} | MU Marketplace - Mulungushi University">
 <meta property="og:description" content="{{ product.description|striptags|truncate(200, True, '…') }}">
 <meta property="og:url" content="{{ url_for('product_page', product_id=product.id, _external=True) }}">
 
