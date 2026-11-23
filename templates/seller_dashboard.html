@@ -959,6 +959,35 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 <script src="{{ url_for('static', filename='js/pull-to-refresh.js') }}" defer></script>
+
+<style id="mu-seller-mobile-overflow-fix">
+/* Keep the notification menu inside the phone viewport instead of letting
+   its 360px panel extend left from the bell near the screen edge. */
+@media (max-width: 700px) {
+  .notify-wrap { position: static !important; }
+  .notification-panel {
+    position: fixed !important;
+    top: max(118px, calc(env(safe-area-inset-top) + 118px)) !important;
+    right: 12px !important;
+    left: auto !important;
+    width: min(360px, calc(100vw - 24px)) !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: min(62vh, 420px) !important;
+    overflow-y: auto !important;
+    z-index: 10000 !important;
+  }
+  /* The fixed bottom navigation must not cover the final dashboard sections. */
+  body { padding-bottom: calc(190px + env(safe-area-inset-bottom)) !important; }
+  .mu-bottom-nav {
+    padding-bottom: calc(14px + env(safe-area-inset-bottom)) !important;
+  }
+  .container { padding-bottom: 28px !important; }
+}
+@media (min-width: 701px) {
+  body { padding-bottom: 110px; }
+}
+</style>
+
 </body>
 </html>
 
