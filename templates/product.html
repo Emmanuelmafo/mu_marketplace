@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{ product.name }} | MU Marketplace</title>
+<meta name="description" content="{{ product.description|striptags|truncate(155, True, '…') }}">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="{{ url_for('product_page', product_id=product.id, _external=True) }}">
+<meta property="og:type" content="product">
+<meta property="og:title" content="{{ product.name }} | MU Marketplace">
+<meta property="og:description" content="{{ product.description|striptags|truncate(200, True, '…') }}">
+<meta property="og:url" content="{{ url_for('product_page', product_id=product.id, _external=True) }}">
+
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#f5f4fb;font-family:Arial,sans-serif;color:#29243b}
