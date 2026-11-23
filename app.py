@@ -374,6 +374,43 @@ def create_app():
             db.close()
         return redirect(url_for("admin_dashboard"))
 
+    # Public discovery endpoints: allow search engines to crawl the storefront.
+    @app.route("/robots.txt")
+    def robots_txt():
+        body = (
+            "User-agent: *\n"
+            "Allow: /\n"
+            "Disallow: /admin/\n"
+            "Disallow: /buyer/\n"
+            "Disallow: /seller/\n"
+            "Disallow: /cart\n"
+            "Disallow: /messages/\n"
+            "Disallow: /account/\n"
+            "Sitemap: " + request.url_root.rstrip("/") + "/sitemap.xml\n"
+        )
+        return app.response_class(body, mimetype="text/plain")
+
+    @app.route("/sitemap.xml")
+    def sitemap_xml():
+        base_url = request.url_root.rstrip("/")
+        urls = [base_url + "/", base_url + "/products"]
+        try:
+            products = get_public_products()
+            urls.extend(
+                base_url + url_for("product_page", product_id=item["id"])
+                for item in products
+            )
+        except Exception:
+            current_app.logger.exception("Unable to build product sitemap")
+        xml_urls = "".join(
+            "<url><loc>" + url.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            + "</loc></url>" for url in urls
+        )
+        xml = '<?xml version="1.0" encoding="UTF-8"?>' \
+              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' \
+              + xml_urls + '</urlset>'
+        return app.response_class(xml, mimetype="application/xml")
+
     # Homepage
     @app.route("/")
     def home():
