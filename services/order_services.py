@@ -180,30 +180,58 @@ def create_order(buyer_id, product_id, quantity, payment_method, delivery_addres
             VALUES (?, ?, 0, 'pending')
         """, (order_id, delivery_address.strip()))
 
-        # Products priced at K100 or below use quantity-based commission
-        # bands: 1-5 units = 1x, 6-10 = 2x, 11-20 = 3x,
-        # then each additional block of 10 units adds another commission.
-        # Products above K100 are charged once per unit sold.
+        # For products priced at K100 or below, the listing's total
+        # quantity determines how many individual units can incur commission.
+        # Only the first permitted units sold are charged; later units are free
+        # of commission. Products above K100 are charged on every unit sold.
         product_price = float(product["price"])
-        if product_price <= 100:
-            if quantity <= 5:
-                commission_multiplier = 1
-            elif quantity <= 10:
-                commission_multiplier = 2
-            else:
-                commission_multiplier = 2 + math.ceil((quantity - 10) / 10)
-        else:
-            commission_multiplier = quantity
-
         unit_commission = min(
             _commission_for_price(product_price),
             product_price
         )
-        commission = round(unit_commission * commission_multiplier, 2)
-        connection.execute("""
-            INSERT INTO commissions (order_id, seller_id, amount, rate, status)
-            VALUES (?, ?, ?, 0, 'pending')
-        """, (order_id, product["seller_id"], commission))
+
+        if product_price <= 100:
+            previous_sales = connection.execute("""
+                SELECT COALESCE(SUM(quantity), 0) AS sold_quantity
+                FROM order_items
+                WHERE product_id = ? AND order_id <> ?
+            """, (product_id, order_id)).fetchone()
+            sold_before = int(previous_sales["sold_quantity"] or 0)
+
+            # Stock is reduced when each order is placed, so current stock
+            # plus all previous ordered units gives the original listed amount.
+            listed_quantity = int(product["stock"] or 0) + sold_before
+
+            if listed_quantity <= 5:
+                allowed_commission_units = 1
+            elif listed_quantity <= 10:
+                allowed_commission_units = 2
+            else:
+                allowed_commission_units = 2 + math.ceil(
+                    (listed_quantity - 10) / 10
+                )
+
+            remaining_commission_units = max(
+                0, allowed_commission_units - sold_before
+            )
+            commission_units_this_order = min(
+                quantity, remaining_commission_units
+            )
+        else:
+            commission_units_this_order = quantity
+
+        # Store each commission as its own record, one record per chargeable
+        # unit sold. This keeps the number of commission charges auditable.
+        for _ in range(commission_units_this_order):
+            connection.execute("""
+                INSERT INTO commissions (order_id, seller_id, amount, rate, status)
+                VALUES (?, ?, ?, ?, 'pending')
+            """, (
+                order_id,
+                product["seller_id"],
+                round(unit_commission, 2),
+                round(unit_commission, 2)
+            ))
 
         connection.execute("""
             UPDATE products SET stock = stock - ? WHERE id = ?
