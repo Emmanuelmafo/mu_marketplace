@@ -90,3 +90,70 @@ table { max-width:100%; }
   }
 }
 
+/* Consistent full-content layout across phone, tablet and desktop.
+   Keep the same source/DOM order at every width; allow wrapping, never hide
+   navigation, dashboard sections, cards, or action buttons. */
+*, *::before, *::after { box-sizing:border-box; }
+html, body { max-width:100%; }
+body { overflow-x:hidden; }
+main, section, article, aside, form, fieldset,
+.container, .page-container, .main-container, .content,
+.dashboard-container, .dashboard-content, .dashboard-section,
+.card, .panel, .product-card, .stat-card {
+  min-width:0;
+  max-width:100%;
+}
+.flex, .row, .actions, .toolbar, .header-actions {
+  min-width:0;
+  flex-wrap:wrap;
+}
+.grid, .product-grid, .products-grid, .category-grid,
+.dashboard-grid, .stats-grid, .cards-grid {
+  min-width:0;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));
+}
+pre, code { max-width:100%; overflow-wrap:anywhere; white-space:pre-wrap; }
+p, h1, h2, h3, h4, label, a, button, td, th {
+  overflow-wrap:anywhere;
+}
+.table-wrap, .table-responsive, .overflow-table {
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+img, video { object-fit:contain; }
+@media (max-width:700px) {
+  .dashboard-grid, .stats-grid, .cards-grid,
+  .product-grid, .products-grid, .category-grid {
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  .dashboard-card, .stat-card, .product-card, .card, .panel {
+    width:100%;
+    min-width:0;
+  }
+  .dashboard-section, section { scroll-margin-top:16px; }
+  .actions, .toolbar, .header-actions {
+    align-items:stretch;
+    gap:8px;
+  }
+  .actions > *, .toolbar > *, .header-actions > * {
+    max-width:100%;
+  }
+  form .form-row, form .form-grid, form .two-column,
+  form .two-col {
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  input, select, textarea { min-width:0!important; }
+  button, input[type="submit"], input[type="button"] {
+    max-width:100%;
+    white-space:normal;
+  }
+}
+@media (min-width:701px) {
+  /* Keep desktop content fully visible without forcing fixed-width panels. */
+  .dashboard-container, .page-container, .main-container {
+    width:min(100% - 32px, 1400px);
+    margin-left:auto;
+    margin-right:auto;
+  }
+}
