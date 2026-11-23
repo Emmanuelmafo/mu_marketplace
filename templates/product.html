@@ -40,12 +40,12 @@ header a{color:#2e05c2;text-decoration:none}
 <div class="product-gallery">
 {% if product.images %}
 <div class="gallery-main">
-<img id="mainProductImage" src="{{ url_for('static', filename=product.images[0]) }}" alt="{{ product.name }} photo 1">
+<img id="mainProductImage" src="{{ product.images[0]|image_src }}" alt="{{ product.name }} photo 1">
 </div>
 {% if product.images|length > 1 %}
 <div class="gallery-thumbnails" aria-label="All product photos">
 {% for image in product.images %}
-<button class="gallery-thumbnail{% if loop.first %} active{% endif %}" type="button" data-image="{{ url_for('static', filename=image) }}" data-alt="{{ product.name }} photo {{ loop.index }}" aria-label="Show product photo {{ loop.index }}" aria-pressed="{{ 'true' if loop.first else 'false' }}">
+<button class="gallery-thumbnail{% if loop.first %} active{% endif %}" type="button" data-image="{{ image|image_src }}" data-alt="{{ product.name }} photo {{ loop.index }}" aria-label="Show product photo {{ loop.index }}" aria-pressed="{{ 'true' if loop.first else 'false' }}">
 <img src="{{ url_for('static', filename=image) }}" alt="Product photo {{ loop.index }}" loading="lazy">
 </button>
 {% endfor %}
