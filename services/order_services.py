@@ -180,15 +180,26 @@ def create_order(buyer_id, product_id, quantity, payment_method, delivery_addres
             VALUES (?, ?, 0, 'pending')
         """, (order_id, delivery_address.strip()))
 
-        # For low-priced items (K20 or below), charge the commission once
-        # per order line, even when the buyer orders multiple units.
-        # For items above K20, retain the existing per-unit commission rule.
+        # Products priced at K100 or below use quantity-based commission
+        # bands: 1-5 units = 1x, 6-10 = 2x, 11-20 = 3x,
+        # then each additional block of 10 units adds another commission.
+        # Products above K100 are charged once per unit sold.
+        product_price = float(product["price"])
+        if product_price <= 100:
+            if quantity <= 5:
+                commission_multiplier = 1
+            elif quantity <= 10:
+                commission_multiplier = 2
+            else:
+                commission_multiplier = 2 + math.ceil((quantity - 10) / 10)
+        else:
+            commission_multiplier = quantity
+
         unit_commission = min(
-            _commission_for_price(product["price"]),
-            float(product["price"])
+            _commission_for_price(product_price),
+            product_price
         )
-        commission_quantity = 1 if float(product["price"]) <= 20 else quantity
-        commission = round(unit_commission * commission_quantity, 2)
+        commission = round(unit_commission * commission_multiplier, 2)
         connection.execute("""
             INSERT INTO commissions (order_id, seller_id, amount, rate, status)
             VALUES (?, ?, ?, 0, 'pending')
