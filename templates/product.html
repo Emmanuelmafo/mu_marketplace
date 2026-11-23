@@ -26,6 +26,15 @@ header a{color:#2e05c2;text-decoration:none}
 .gallery-thumbnail{height:78px;padding:3px;border:2px solid #e7e2f3;border-radius:9px;background:#fff;cursor:pointer;overflow:hidden}
 .gallery-thumbnail.active{border-color:#2e05c2;box-shadow:0 0 0 2px rgba(46,5,194,.1)}
 .gallery-thumbnail img{width:100%;height:100%;object-fit:cover;border-radius:5px}
+.gallery-thumbnails{align-items:start}
+.gallery-thumbnail{display:block;width:100%;min-width:0}
+.gallery-thumbnail img{display:block}
+.gallery-thumbnail:focus-visible{outline:3px solid #c69a3a;outline-offset:2px}
+@media(max-width:650px){
+  .gallery-thumbnails{display:flex;overflow-x:auto;gap:9px;padding:2px 2px 8px;scroll-snap-type:x mandatory}
+  .gallery-thumbnail{flex:0 0 76px;width:76px;height:76px;scroll-snap-align:start}
+}
+
 .price{font-size:25px;font-weight:bold;color:#2e05c2}
 .btn{display:inline-block;background:#2e05c2;color:white;padding:12px 20px;border:0;border-radius:7px;text-decoration:none;margin-top:12px;cursor:pointer;font-size:14px}
 .muted{color:#77738a;line-height:1.6}
@@ -46,7 +55,7 @@ header a{color:#2e05c2;text-decoration:none}
 <div class="gallery-thumbnails" aria-label="All product photos">
 {% for image in product.images %}
 <button class="gallery-thumbnail{% if loop.first %} active{% endif %}" type="button" data-image="{{ image|image_src }}" data-alt="{{ product.name }} photo {{ loop.index }}" aria-label="Show product photo {{ loop.index }}" aria-pressed="{{ 'true' if loop.first else 'false' }}">
-<img src="{{ url_for('static', filename=image) }}" alt="Product photo {{ loop.index }}" loading="lazy">
+<img src="{{ image|image_src }}" alt="{{ product.name }} photo {{ loop.index }}" loading="lazy">
 </button>
 {% endfor %}
 </div>
